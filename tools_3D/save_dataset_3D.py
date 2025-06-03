@@ -20,7 +20,7 @@ AUG_PER_CLASS = {"train": 60, "val": 60, "test": 60}
 SEED = 42
 VAL_RATIO = 0.2
 TEST_RATIO = 0.2
-IMAGE_SIZE = (224, 224, 224)
+IMAGE_SIZE = (512, 512, 512)
 
 random.seed(SEED)
 os.makedirs(SAVE_DIR, exist_ok=True)
