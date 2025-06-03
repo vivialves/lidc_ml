@@ -16,7 +16,7 @@ import csv
 # Constants
 DICOM_DIR = "/home/vivianea/projects/BrainInnov/data/LIDC_classes_dcm"
 SAVE_DIR = "/home/vivianea/projects/BrainInnov/data/npy3d_split"
-AUG_PER_CLASS = {"train": 3, "val": 3, "test": 3}
+AUG_PER_CLASS = {"train": 60, "val": 60, "test": 60}
 SEED = 42
 VAL_RATIO = 0.2
 TEST_RATIO = 0.2
