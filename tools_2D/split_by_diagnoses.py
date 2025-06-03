@@ -6,9 +6,9 @@ import pydicom
 from tqdm import tqdm
 
 # ---------------- CONFIG ----------------
-SAVE_DIR = '/home/vivianea/projects/BrainInnov/data/LIDC_classes_dcm'
-DIAGNOSIS_FILE = '/home/vivianea/projects/BrainInnov/data/LIDC/tcia-diagnosis-data-2012-04-20.xls'
-LIDC_DATA_DIR = '/home/vivianea/projects/BrainInnov/data/LIDC'
+SAVE_DIR = '/home/etudiant/Projets/Viviane/LIDC-ML/data/LIDC_classes_dcm'
+DIAGNOSIS_FILE = '/home/etudiant/Projets/Viviane/LIDC-ML/data/LIDC/tcia-diagnosis-data-2012-04-20.xls'
+LIDC_DATA_DIR = '/home/etudiant/Projets/Viviane/LIDC-ML/LIDC'
 # ----------------------------------------
 
 # Create output directories
