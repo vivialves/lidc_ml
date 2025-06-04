@@ -8,7 +8,7 @@ from tqdm import tqdm
 # ---------------- CONFIG ----------------
 SAVE_DIR = '/home/etudiant/Projets/Viviane/LIDC-ML/data/LIDC_classes_dcm'
 DIAGNOSIS_FILE = '/home/etudiant/Projets/Viviane/LIDC-ML/data/LIDC/tcia-diagnosis-data-2012-04-20.xls'
-LIDC_DATA_DIR = '/home/etudiant/Projets/Viviane/LIDC-ML/LIDC'
+LIDC_DATA_DIR = '/home/etudiant/Projets/Viviane/LIDC-ML/data/LIDC'
 # ----------------------------------------
 
 # Create output directories

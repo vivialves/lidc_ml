@@ -14,9 +14,9 @@ from tqdm import tqdm
 import csv
 
 # Constants
-DICOM_DIR = "/home/vivianea/projects/BrainInnov/data/LIDC_classes_dcm"
-SAVE_DIR = "/home/vivianea/projects/BrainInnov/data/npy3d_split"
-AUG_PER_CLASS = {"train": 60, "val": 60, "test": 60}
+DICOM_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/data/LIDC_classes_dcm"
+SAVE_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/data/npy3d_split"
+AUG_PER_CLASS = {"train": 0, "val": 0, "test": 0}
 SEED = 42
 VAL_RATIO = 0.2
 TEST_RATIO = 0.2
