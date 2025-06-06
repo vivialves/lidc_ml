@@ -12,8 +12,8 @@ from tqdm import tqdm
 import csv
 
 # --- Configuration ---
-DICOM_DIR = "/home/vivianea/projects/BrainInnov/data/LIDC_classes_dcm"
-SAVE_DIR = "/home/vivianea/projects/BrainInnov/data/npy_balanced_split"
+DICOM_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/data/LIDC_classes_dcm"
+SAVE_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/data/npy_balanced_split"
 IMAGE_SIZE = (512, 512)
 VAL_RATIO = 0.2
 TEST_RATIO = 0.2
