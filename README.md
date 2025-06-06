@@ -111,7 +111,7 @@ This project uses a 3D CNN (e.g., 3D DenseNet) with:
 
 **Viviane Alves de Oliveira**
 Python Developer | AI Enthusiast | Medical AI Researcher
-📧 [LinkedIn](https://www.linkedin.com/in/vivianealvesoliveira)
+📧 [LinkedIn](https://www.linkedin.com/in/vivialves-developer)
 
 ---
 
