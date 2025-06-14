@@ -180,7 +180,7 @@ def resize_volume(volume, target_shape):
         return np.asarray(resized)
 
 def normalize_volume(volume):
-    volume = np.clip(volume, -1000, 400)
+    volume = np.clip(volume, -1000, 150)
     min_val = np.min(volume)
     max_val = np.max(volume)
     if max_val - min_val > 0:
