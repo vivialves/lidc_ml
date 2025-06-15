@@ -66,7 +66,7 @@ else:
 #-------------------------------------------------  Constants -------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-IMAGE_SIZE = (128, 128, 128)
+IMAGE_SIZE = (256, 256, 256)
 BATCH_SIZE = 1
 NUM_CHANNELS = 1
 DEPTH = 64
@@ -77,11 +77,11 @@ SEED = 42
 VAL_RATIO = 0.2
 TEST_RATIO = 0.2
 
-DICOM_DIR = "/home/vivianea/projects/BrainInnov/data/LIDC_classes_dcm"
-PATH_MODEL = '/home/vivianea/projects/BrainInnov/models/best_model_densenet_pytorch3D_architecture.pth'
+DICOM_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/data/LIDC_classes_dcm"
+PATH_MODEL = '/home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_efficientnet_pytorch3D_architecture.pth'
 
-SAVE_DIR = "/home/vivianea/projects/BrainInnov/py_files_3D/"
-PATH_RESULTS = "/home/vivianea/projects/BrainInnov/py_files_3D/densenet/results"
+SAVE_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/"
+PATH_RESULTS = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/efficientnet/results"
 CLASS_MAP = {'cancer': 0, 'non-cancer': 1}
 INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
 
@@ -89,7 +89,7 @@ AUG_PER_CLASS = {"train": 0, "val": 0, "test": 0}
 
 IMAGE_SIZE_SUMMARY = 128
 
-NUM_AUG_PER_SAMPLE = 3
+NUM_AUG_PER_SAMPLE = 60
 
 LOG_FILE = "training_log.txt"
 
@@ -350,49 +350,26 @@ for idx, count in label_counts.items():
 #-------------------------------------------------  Architecture -----------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-from monai.networks.nets import DenseNet121
+from monai.networks.nets import EfficientNetBN
+import torch.nn as nn
 
-# --- Squeeze-and-Excitation Block ---
-class SEBlock(nn.Module):
-    def __init__(self, channels, reduction=16):
-        super(SEBlock, self).__init__()
-        self.pool = nn.AdaptiveAvgPool3d(1)
-        self.fc = nn.Sequential(
-            nn.Linear(channels, channels // reduction, bias=False),
-            nn.ReLU(inplace=True),
-            nn.Linear(channels // reduction, channels, bias=False),
-            nn.Sigmoid()
-        )
-
-    def forward(self, x):
-        b, c, _, _, _ = x.size()
-        y = self.pool(x).view(b, c)
-        y = self.fc(y).view(b, c, 1, 1, 1)
-        return x * y.expand_as(x)
-
-# --- DenseNet121 with SE and Dropout ---
-class DenseNet3DWithSE(nn.Module):
-    def __init__(self, in_channels=1, out_channels=2, dropout_rate=0.3, reduction=16):
-        super(DenseNet3DWithSE, self).__init__()
-        self.densenet = DenseNet121(
+class EfficientNet3DClassifier(nn.Module):
+    def __init__(self, in_channels=1, out_channels=2):  # Set to 2 for CrossEntropyLoss
+        super().__init__()
+        self.model = EfficientNetBN(
             spatial_dims=3,
             in_channels=in_channels,
-            out_channels=out_channels
+            out_channels=out_channels,
+            model_name="efficientnet-b0",  # options: efficientnet-b0 to b7
+            pretrained=False,
         )
-        self.se = SEBlock(channels=1024, reduction=reduction)  # 1024 is the output from DenseNet121's final feature map
-        self.dropout = nn.Dropout(p=dropout_rate)
 
     def forward(self, x):
-        x = self.densenet.features(x)
-        x = self.se(x)
-        x = self.dropout(x)
-        x = self.densenet.class_layers(x)
-        return x
-
+        return self.model(x)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model = DenseNet3DWithSE() # Binary classification
+model = EfficientNet3DClassifier() # Binary classification
 model = model.to(device)  # If using GPU
 
 criterion = torch.nn.CrossEntropyLoss()
@@ -849,8 +826,8 @@ for i, name in enumerate(classes):
 try:
     # 2. Instantiate your model class
     # Pass the SAME in_channels and out_channels that you used during training.
-    model = DenseNet3DWithSE()
-    print(f"Instantiated Resnet3D")
+    model = EfficientNet3DClassifier()
+    print(f"Instantiated EfficientNet3D-Pytorch")
 
     # 3. Load the state_dict
     state_dict = torch.load(PATH_MODEL)
@@ -974,8 +951,8 @@ class GradCAM3D:
 
 #####################################################  GRADCAM Cancer ###################################################################
 
-# Choose target layer (last conv in Densenet_3D Pytorch CNN)
-target_layer = model.model.features.norm5
+# Choose target layer (last conv in EfficientNet_3D Pytorch CNN)
+target_layer = model.model.features[-1]
 
 # Initialize GradCAM
 grad_cam = GradCAM3D(model, target_layer)
@@ -989,8 +966,8 @@ grad_cam.visualize(image, cam, predicted_class, lab='cancer')
 
 #####################################################  GRADCAM Non-Cancer ###################################################################
 
-# Choose target layer (last conv in Densenet_3D Pytorch CNN)
-target_layer = model.model.features.norm5
+# Choose target layer (last conv in EfficientNet_3D Pytorch CNN)
+target_layer = model.model.features[-1]
 
 # Initialize GradCAM
 grad_cam = GradCAM3D(model, target_layer)
