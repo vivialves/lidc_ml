@@ -729,12 +729,6 @@ plot_training(train_losses, val_losses, train_accuracies, val_accuracies)
 
 #####################################################  Confusion Matrix ###################################################################
 
-
-print(final_conf_matrix)
-log_message('final_conf_matrix')
-log_message(final_conf_matrix)
-
-
 cm = conf_matrix.cpu().numpy()
 disp = ConfusionMatrixDisplay(cm, display_labels=classes,)
 disp.plot()
