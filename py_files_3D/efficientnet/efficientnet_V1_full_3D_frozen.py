@@ -66,7 +66,7 @@ else:
 #-------------------------------------------------  Constants -------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-IMAGE_SIZE = (256, 256, 256)
+IMAGE_SIZE = (128, 128, 128)
 BATCH_SIZE = 1
 NUM_CHANNELS = 1
 DEPTH = 64
@@ -82,6 +82,12 @@ PATH_MODEL = '/home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_efficient
 
 SAVE_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/"
 PATH_RESULTS = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/efficientnet/results"
+
+DICOM_DIR = "/home/vivianea/projects/BrainInnov/data/LIDC_classes_dcm"
+PATH_MODEL = '/home/vivianea/projects/BrainInnov/models/best_model_efficientnet_pytorch3D_architecture.pth'
+
+SAVE_DIR = "/home/vivianea/projects/BrainInnov/py_files_3D/"
+PATH_RESULTS = "/home/vivianea/projects/BrainInnov/py_files_3D/efficientnet/results"
 CLASS_MAP = {'cancer': 0, 'non-cancer': 1}
 INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
 
@@ -351,17 +357,21 @@ for idx, count in label_counts.items():
 #---------------------------------------------------------------------------------------------------------------------------------------
 
 from monai.networks.nets import EfficientNetBN
-import torch.nn as nn
 
 class EfficientNet3DClassifier(nn.Module):
-    def __init__(self, in_channels=1, out_channels=2):  # Set to 2 for CrossEntropyLoss
+    def __init__(self, model_name="efficientnet-b0", in_channels=1, num_classes=2):
         super().__init__()
         self.model = EfficientNetBN(
+            model_name=model_name,
             spatial_dims=3,
             in_channels=in_channels,
-            out_channels=out_channels,
-            model_name="efficientnet-b0",  # options: efficientnet-b0 to b7
-            pretrained=False,
+            pretrained=False  # or True if you want to fine-tune
+        )
+        # Replace the classifier
+        in_features = self.model._fc.in_features
+        self.model._fc = nn.Sequential(
+            nn.Dropout(p=0.3, inplace=True),
+            nn.Linear(in_features, num_classes)
         )
 
     def forward(self, x):
@@ -729,12 +739,6 @@ plot_training(train_losses, val_losses, train_accuracies, val_accuracies)
 
 #####################################################  Confusion Matrix ###################################################################
 
-
-print(final_conf_matrix)
-log_message('final_conf_matrix')
-log_message(final_conf_matrix)
-
-
 cm = conf_matrix.cpu().numpy()
 disp = ConfusionMatrixDisplay(cm, display_labels=classes,)
 disp.plot()
@@ -952,7 +956,7 @@ class GradCAM3D:
 #####################################################  GRADCAM Cancer ###################################################################
 
 # Choose target layer (last conv in EfficientNet_3D Pytorch CNN)
-target_layer = model.model.features[-1]
+target_layer = model.model._conv_head
 
 # Initialize GradCAM
 grad_cam = GradCAM3D(model, target_layer)
@@ -967,7 +971,7 @@ grad_cam.visualize(image, cam, predicted_class, lab='cancer')
 #####################################################  GRADCAM Non-Cancer ###################################################################
 
 # Choose target layer (last conv in EfficientNet_3D Pytorch CNN)
-target_layer = model.model.features[-1]
+target_layer = model.model._conv_head
 
 # Initialize GradCAM
 grad_cam = GradCAM3D(model, target_layer)

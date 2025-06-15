@@ -89,7 +89,7 @@ AUG_PER_CLASS = {"train": 0, "val": 0, "test": 0}
 
 IMAGE_SIZE_SUMMARY = 128
 
-NUM_AUG_PER_SAMPLE = 3
+NUM_AUG_PER_SAMPLE = 60
 
 LOG_FILE = "training_log.txt"
 
@@ -752,12 +752,6 @@ plot_training(train_losses, val_losses, train_accuracies, val_accuracies)
 
 #####################################################  Confusion Matrix ###################################################################
 
-
-print(final_conf_matrix)
-log_message('final_conf_matrix')
-log_message(final_conf_matrix)
-
-
 cm = conf_matrix.cpu().numpy()
 disp = ConfusionMatrixDisplay(cm, display_labels=classes,)
 disp.plot()
@@ -975,7 +969,7 @@ class GradCAM3D:
 #####################################################  GRADCAM Cancer ###################################################################
 
 # Choose target layer (last conv in Densenet_3D Pytorch CNN)
-target_layer = model.model.features.norm5
+target_layer = model.features.norm5
 
 # Initialize GradCAM
 grad_cam = GradCAM3D(model, target_layer)
@@ -990,7 +984,7 @@ grad_cam.visualize(image, cam, predicted_class, lab='cancer')
 #####################################################  GRADCAM Non-Cancer ###################################################################
 
 # Choose target layer (last conv in Densenet_3D Pytorch CNN)
-target_layer = model.model.features.norm5
+target_layer = model.features.norm5
 
 # Initialize GradCAM
 grad_cam = GradCAM3D(model, target_layer)

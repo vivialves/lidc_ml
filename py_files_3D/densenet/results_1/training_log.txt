@@ -1,0 +1,88 @@
+
+
+==== Training started at 2025-06-14 23:30:17.225095 ====
+
+Using Gradient Accumulation with 4 steps.
+DataLoader batch size: 1
+Effective batch size: 4
+
+Epoch 1/50
+Train Loss: 0.3030 | Train Acc: 91.77%
+Val Loss: 0.9494 | Val Acc: 48.28%
+Precision: 0.4786 | Recall: 0.4841 | F1 Score: 0.4479
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 1: 93
+Label distribution in training epoch: Counter({1: 2828, 0: 2752})
+
+Validation loss improved. Saving best model to /home/vivianea/projects/BrainInnov/models/best_model_densenet_pytorch3D_architecture.pth
+
+Epoch 2/50
+Train Loss: 0.0041 | Train Acc: 100.00%
+Val Loss: 1.7184 | Val Acc: 51.61%
+Precision: 0.2581 | Recall: 0.5000 | F1 Score: 0.3404
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 2: 93
+Label distribution in training epoch: Counter({0: 2819, 1: 2761})
+
+Validation loss did not improve. Patience: 1/6
+
+Epoch 3/50
+Train Loss: 0.0013 | Train Acc: 100.00%
+Val Loss: 1.8285 | Val Acc: 51.20%
+Precision: 0.2560 | Recall: 0.5000 | F1 Score: 0.3386
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 3: 93
+Label distribution in training epoch: Counter({0: 2859, 1: 2721})
+
+Validation loss did not improve. Patience: 2/6
+
+Epoch 4/50
+Train Loss: 0.0006 | Train Acc: 100.00%
+Val Loss: 1.9285 | Val Acc: 50.94%
+Precision: 0.2547 | Recall: 0.5000 | F1 Score: 0.3375
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 4: 93
+Label distribution in training epoch: Counter({0: 2803, 1: 2777})
+
+Validation loss did not improve. Patience: 3/6
+
+Epoch 5/50
+Train Loss: 0.0003 | Train Acc: 100.00%
+Val Loss: 1.3633 | Val Acc: 46.56%
+Precision: 0.2447 | Recall: 0.4529 | F1 Score: 0.3177
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 5: 93
+Label distribution in training epoch: Counter({0: 2803, 1: 2777})
+
+Validation loss did not improve. Patience: 4/6
+
+Epoch 6/50
+Train Loss: 0.0002 | Train Acc: 100.00%
+Val Loss: 1.7615 | Val Acc: 47.19%
+Precision: 0.2471 | Recall: 0.4562 | F1 Score: 0.3206
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 6: 93
+Label distribution in training epoch: Counter({0: 2793, 1: 2787})
+
+Validation loss did not improve. Patience: 5/6
+
+Epoch 7/50
+Train Loss: 0.0001 | Train Acc: 100.00%
+Val Loss: 1.1118 | Val Acc: 52.14%
+Precision: 0.2607 | Recall: 0.5000 | F1 Score: 0.3427
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 7: 93
+Label distribution in training epoch: Counter({1: 2836, 0: 2744})
+
+Validation loss did not improve. Patience: 6/6
+
+Early stopping triggered after 7 epochs.
+
+
+Training complete.
+Loading best model from /home/vivianea/projects/BrainInnov/models/best_model_densenet_pytorch3D_architecture.pth for final metrics.
+######## Training Finished in 1h 32m 38s ###########
+Test Accuracy on 1920 images: 44.74%
+AUC: 0.5422
+Class 0-non-cancer: Precision: 0.52, Recall: 0.23, F1-Score: 0.32
+Class 1-cancer: Precision: 0.48, Recall: 0.77, F1-Score: 0.59
