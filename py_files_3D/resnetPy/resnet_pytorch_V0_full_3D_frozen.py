@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------------------------------------------------------------------------
-#-------------------------------------------------  CNN - EfficientNet - 3D CNN ------------------------------------------------------
+#-------------------------------------------------  CNN - Resnet - 3D CNN (Pytorch) ----------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -78,10 +78,11 @@ VAL_RATIO = 0.2
 TEST_RATIO = 0.2
 
 DICOM_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/data/LIDC_classes_dcm"
-PATH_MODEL = '/home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_efficientnet_pytorch3D_architecture.pth'
+PATH_MODEL = '/home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_resnet_pytorch3D_architecture_v0.pth'
 
 SAVE_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/"
-PATH_RESULTS = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/efficientnet/results"
+PATH_RESULTS = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/resnetPy/results"
+
 
 CLASS_MAP = {'cancer': 0, 'non-cancer': 1}
 INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
@@ -351,30 +352,52 @@ for idx, count in label_counts.items():
 #-------------------------------------------------  Architecture -----------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-from monai.networks.nets import EfficientNetBN
+from torchvision.models.video import r3d_18
 
-class EfficientNet3DClassifier(nn.Module):
-    def __init__(self, model_name="efficientnet-b0", in_channels=1, num_classes=2):
-        super().__init__()
-        self.model = EfficientNetBN(
-            model_name=model_name,
-            spatial_dims=3,
-            in_channels=in_channels,
-            pretrained=False  # or True if you want to fine-tune
-        )
-        # Replace the classifier
-        in_features = self.model._fc.in_features
-        self.model._fc = nn.Sequential(
-            nn.Dropout(p=0.3, inplace=True),
-            nn.Linear(in_features, num_classes)
-        )
+# Model Definition
+class AttentionBlock(nn.Module):
+    def __init__(self, in_channels):
+        super(AttentionBlock, self).__init__()
+        self.conv1 = nn.Conv3d(in_channels, in_channels // 2, kernel_size=1)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv3d(in_channels // 2, in_channels, kernel_size=1)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        return self.model(x)
+        attn = self.conv1(x)
+        attn = self.relu(attn)
+        attn = self.conv2(attn)
+        attn = self.sigmoid(attn)
+        return x * attn
+
+class Resnet3DClassifierPy(nn.Module):
+    def __init__(self, num_classes=2):
+        super(Resnet3DClassifierPy, self).__init__()
+        self.backbone = r3d_18(weights=None)
+        self.backbone.stem[0] = nn.Conv3d(1, 64, kernel_size=(3, 7, 7), stride=(1, 2, 2), padding=(1, 3, 3))
+        self.attn = AttentionBlock(in_channels=512)
+        self.backbone.fc = nn.Identity()
+        self.dropout = nn.Dropout(0.3)
+        self.fc = nn.Linear(512, num_classes)
+
+    def forward(self, x):
+        x = self.backbone.stem(x)
+        x = self.backbone.layer1(x)
+        x = self.backbone.layer2(x)
+        x = self.backbone.layer3(x)
+        self.dropout = nn.Dropout(0.3)
+        x = self.backbone.layer4(x)
+        x = self.attn(x)
+        x = self.backbone.avgpool(x)
+        x = torch.flatten(x, 1)
+        self.dropout = nn.Dropout(0.3)
+        x = self.fc(x)
+        return x
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model = EfficientNet3DClassifier() # Binary classification
+model = Resnet3DClassifierPy() # Binary classification
 model = model.to(device)  # If using GPU
 
 criterion = torch.nn.CrossEntropyLoss()
@@ -825,8 +848,8 @@ for i, name in enumerate(classes):
 try:
     # 2. Instantiate your model class
     # Pass the SAME in_channels and out_channels that you used during training.
-    model = EfficientNet3DClassifier()
-    print(f"Instantiated EfficientNet3D-Pytorch")
+    model = Resnet3DClassifierPy()
+    print(f"Instantiated Resnet3D-Pytorch")
 
     # 3. Load the state_dict
     state_dict = torch.load(PATH_MODEL)
@@ -950,8 +973,8 @@ class GradCAM3D:
 
 #####################################################  GRADCAM Cancer ###################################################################
 
-# Choose target layer (last conv in EfficientNet_3D Pytorch CNN)
-target_layer = model.model._conv_head
+# Choose target layer (last conv in ResNet_3D Pytorch CNN)
+target_layer = model.backbone.layer4[-1]
 
 # Initialize GradCAM
 grad_cam = GradCAM3D(model, target_layer)
@@ -965,8 +988,8 @@ grad_cam.visualize(image, cam, predicted_class, lab='cancer')
 
 #####################################################  GRADCAM Non-Cancer ###################################################################
 
-# Choose target layer (last conv in EfficientNet_3D Pytorch CNN)
-target_layer = model.model._conv_head
+# Choose target layer (last conv in ResNet_3D Pytorch CNN)
+target_layer = model.backbone.layer4[-1]
 
 # Initialize GradCAM
 grad_cam = GradCAM3D(model, target_layer)
