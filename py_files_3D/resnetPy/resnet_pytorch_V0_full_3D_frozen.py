@@ -78,7 +78,7 @@ VAL_RATIO = 0.2
 TEST_RATIO = 0.2
 
 DICOM_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/data/LIDC_classes_dcm"
-PATH_MODEL = '/home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_resnet_pytorch3D_architecture.pth'
+PATH_MODEL = '/home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_resnet_pytorch3D_architecture_v0.pth'
 
 SAVE_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/"
 PATH_RESULTS = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/resnetPy/results"
