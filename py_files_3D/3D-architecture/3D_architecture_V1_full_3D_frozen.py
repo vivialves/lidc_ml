@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------------------------------------------------------------------------
-#-------------------------------------------------  CNN - DenseNet 3D --------------------------------------------------------------
+#-------------------------------------------------  CNN -3D Architecture--------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -78,10 +78,10 @@ VAL_RATIO = 0.2
 TEST_RATIO = 0.2
 
 DICOM_DIR = "/home/vivianea/projects/BrainInnov/data/LIDC_classes_dcm"
-PATH_MODEL = '/home/vivianea/projects/BrainInnov/models/best_model_densenet_pytorch3D_architecture.pth'
+PATH_MODEL = '/home/vivianea/projects/BrainInnov/models/best_model_3D_architecture.pth'
 
 SAVE_DIR = "/home/vivianea/projects/BrainInnov/py_files_3D/"
-PATH_RESULTS = "/home/vivianea/projects/BrainInnov/py_files_3D/densenet/results"
+PATH_RESULTS = "/home/vivianea/projects/BrainInnov/py_files_3D/3D-architecture/results"
 CLASS_MAP = {'cancer': 0, 'non-cancer': 1}
 INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
 
@@ -350,56 +350,82 @@ for idx, count in label_counts.items():
 #-------------------------------------------------  Architecture -----------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-from monai.networks.nets import DenseNet121
-
-# --- Squeeze-and-Excitation Block ---
 class SEBlock(nn.Module):
     def __init__(self, channels, reduction=16):
         super(SEBlock, self).__init__()
-        self.pool = nn.AdaptiveAvgPool3d(1)
-        self.fc = nn.Sequential(
-            nn.Linear(channels, channels // reduction, bias=False),
-            nn.ReLU(inplace=True),
-            nn.Linear(channels // reduction, channels, bias=False),
-            nn.Sigmoid()
+        self.global_pool = nn.AdaptiveAvgPool3d(1)
+        self.fc1 = nn.Linear(channels, channels // reduction)
+        self.relu = nn.ReLU(inplace=True)
+        self.fc2 = nn.Linear(channels // reduction, channels)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        b, c, d, h, w = x.size()
+        se = self.global_pool(x).view(b, c)
+        se = self.fc1(se)
+        se = self.relu(se)
+        se = self.fc2(se)
+        se = self.sigmoid(se).view(b, c, 1, 1, 1)
+        return x * se
+
+
+class ResidualSEBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, reduction=16):
+        super().__init__()
+        self.conv1 = nn.Conv3d(in_channels, out_channels, kernel_size=3, padding=1)
+        self.bn1 = nn.BatchNorm3d(out_channels)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv3d(out_channels, out_channels, kernel_size=3, padding=1)
+        self.bn2 = nn.BatchNorm3d(out_channels)
+        self.se = SEBlock(out_channels, reduction)
+        self.residual = nn.Conv3d(in_channels, out_channels, kernel_size=1) if in_channels != out_channels else nn.Identity()
+
+    def forward(self, x):
+        identity = self.residual(x)
+        out = self.relu(self.bn1(self.conv1(x)))
+        out = self.bn2(self.conv2(out))
+        out = self.se(out)
+        out += identity
+        out = self.relu(out)
+        return out
+
+
+class SE3DCNN(nn.Module):
+    def __init__(self, num_classes=2, dropout_rate=0.3):
+        super().__init__()
+        self.layer1 = ResidualSEBlock(1, 32)
+        self.pool1 = nn.MaxPool3d(2)
+        self.drop1 = nn.Dropout3d(dropout_rate)
+
+        self.layer2 = ResidualSEBlock(32, 64)
+        self.pool2 = nn.MaxPool3d(2)
+        self.drop2 = nn.Dropout3d(dropout_rate)
+
+        self.layer3 = ResidualSEBlock(64, 128)
+        self.pool3 = nn.AdaptiveAvgPool3d(1)
+
+        self.classifier = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Dropout(dropout_rate),
+            nn.Linear(64, num_classes)
         )
 
     def forward(self, x):
-        b, c, _, _, _ = x.size()
-        y = self.pool(x).view(b, c)
-        y = self.fc(y).view(b, c, 1, 1, 1)
-        return x * y.expand_as(x)
-
-# --- DenseNet121 with SE and Dropout ---
-class DenseNet3DWithSE(nn.Module):
-    def __init__(self, in_channels=1, out_channels=2, dropout_rate=0.3, reduction=16):
-        super(DenseNet3DWithSE, self).__init__()
-        self.densenet = DenseNet121(
-            spatial_dims=3,
-            in_channels=in_channels,
-            out_channels=out_channels
-        )
-        self.se = SEBlock(channels=1024, reduction=reduction)  # 1024 is the output from DenseNet121's final feature map
-        self.dropout = nn.Dropout(p=dropout_rate)
-
-    def forward(self, x):
-        x = self.densenet.features(x)
-        x = self.se(x)
-        x = self.dropout(x)
-        x = self.densenet.class_layers(x)
+        x = self.drop1(self.pool1(self.layer1(x)))
+        x = self.drop2(self.pool2(self.layer2(x)))
+        x = self.pool3(self.layer3(x))
+        x = self.classifier(x)
         return x
-
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model = DenseNet3DWithSE() # Binary classification
+model = SE3DCNN(num_classes=2)
 model = model.to(device)  # If using GPU
 
 criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-4)
-
-summary(model, input_size=(BATCH_SIZE, NUM_CHANNELS, DEPTH, IMAGE_SIZE_SUMMARY, IMAGE_SIZE_SUMMARY))
-
 
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  Training ---------------------------------------------------------------------------
@@ -843,8 +869,8 @@ for i, name in enumerate(classes):
 try:
     # 2. Instantiate your model class
     # Pass the SAME in_channels and out_channels that you used during training.
-    model = DenseNet3DWithSE()
-    print(f"Instantiated DenseNet3D")
+    model = SE3DCNN(num_classes=2)
+    print(f"Instantiated CNN-3D")
 
     # 3. Load the state_dict
     state_dict = torch.load(PATH_MODEL)
@@ -968,8 +994,8 @@ class GradCAM3D:
 
 #####################################################  GRADCAM Cancer ###################################################################
 
-# Choose target layer (last conv in Densenet_3D Pytorch CNN)
-target_layer = model.densenet.features.norm5
+# Choose target layer (last conv in 3D-CNN)
+target_layer = model.layer3
 
 # Initialize GradCAM
 grad_cam = GradCAM3D(model, target_layer)
@@ -983,8 +1009,8 @@ grad_cam.visualize(image, cam, predicted_class, lab='cancer')
 
 #####################################################  GRADCAM Non-Cancer ###################################################################
 
-# Choose target layer (last conv in Densenet_3D Pytorch CNN)
-target_layer = model.densenet.features.norm5
+# Choose target layer (last conv in 3D-CNN)
+target_layer = model.layer3
 
 # Initialize GradCAM
 grad_cam = GradCAM3D(model, target_layer)
@@ -995,4 +1021,3 @@ cam, predicted_class = grad_cam.generate(image)
 
 # Show visualization
 grad_cam.visualize(image, cam, predicted_class, lab='non-cancer')
-

@@ -1,0 +1,15 @@
+######## Training Finished in 0h 0m 0s ###########
+Test Accuracy on 1920 images: 51.51%
+######## Training Finished in 0h 0m 0s ###########
+Test Accuracy on 1920 images: 51.04%
+AUC: 0.6094
+Class 0-non-cancer: Precision: 0.42, Recall: 0.09, F1-Score: 0.14
+Class 1-cancer: Precision: 0.48, Recall: 0.87, F1-Score: 0.62
+
+
+==== Training started at 2025-06-15 13:54:28.609304 ====
+
+Using Gradient Accumulation with 4 steps.
+DataLoader batch size: 1
+Effective batch size: 4
+
