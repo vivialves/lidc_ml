@@ -66,10 +66,10 @@ else:
 #-------------------------------------------------  Constants -------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-IMAGE_SIZE = (256, 256, 256)
+IMAGE_SIZE = (128, 128, 128)
 BATCH_SIZE = 1
 NUM_CHANNELS = 1
-DEPTH = 128
+DEPTH = 64
 NUM_CLASSES = 2
 PATIENCE_COUNTER = 6
 EPOCHS = 50
@@ -77,19 +77,21 @@ SEED = 42
 VAL_RATIO = 0.2
 TEST_RATIO = 0.2
 
-DICOM_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/data/LIDC_classes_dcm"
-PATH_MODEL = '/home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_resnet_pytorch3D_architecture.pth'
+DICOM_DIR = "/home/vivianea/projects/BrainInnov/data/LIDC_classes_dcm"
+PATH_MODEL = '/home/vivianea/projects/BrainInnov/models/best_model_resnet_pytorch3D_architecture.pth'
 
-SAVE_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/"
-PATH_RESULTS = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/resnetPy/results"
+SAVE_DIR = "/home/vivianea/projects/BrainInnov/py_files_3D/"
+PATH_RESULTS = "/home/vivianea/projects/BrainInnov/py_files_3D/resnetPy/results"
+
+
 CLASS_MAP = {'cancer': 0, 'non-cancer': 1}
 INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
 
 AUG_PER_CLASS = {"train": 0, "val": 0, "test": 0}
 
-IMAGE_SIZE_SUMMARY = 256
+IMAGE_SIZE_SUMMARY = 64
 
-NUM_AUG_PER_SAMPLE = 60
+NUM_AUG_PER_SAMPLE = 65
 
 LOG_FILE = "training_log.txt"
 
@@ -352,6 +354,7 @@ for idx, count in label_counts.items():
 
 from torchvision.models.video import r3d_18
 
+# Model Definition
 class AttentionBlock(nn.Module):
     def __init__(self, in_channels):
         super(AttentionBlock, self).__init__()
@@ -370,11 +373,11 @@ class AttentionBlock(nn.Module):
 class Resnet3DClassifierPy(nn.Module):
     def __init__(self, num_classes=2):
         super(Resnet3DClassifierPy, self).__init__()
-        self.backbone = r3d_18(weights="KINETICS400_V1")
+        self.backbone = r3d_18(weights=None)
         self.backbone.stem[0] = nn.Conv3d(1, 64, kernel_size=(3, 7, 7), stride=(1, 2, 2), padding=(1, 3, 3))
         self.attn = AttentionBlock(in_channels=512)
         self.backbone.fc = nn.Identity()
-        self.dropout = nn.Dropout(0.5)
+        self.dropout = nn.Dropout(0.3)
         self.fc = nn.Linear(512, num_classes)
 
     def forward(self, x):
@@ -382,12 +385,12 @@ class Resnet3DClassifierPy(nn.Module):
         x = self.backbone.layer1(x)
         x = self.backbone.layer2(x)
         x = self.backbone.layer3(x)
-        self.dropout = nn.Dropout(0.5)
+        self.dropout = nn.Dropout(0.3)
         x = self.backbone.layer4(x)
         x = self.attn(x)
         x = self.backbone.avgpool(x)
         x = torch.flatten(x, 1)
-        self.dropout = nn.Dropout(0.5)
+        self.dropout = nn.Dropout(0.3)
         x = self.fc(x)
         return x
 
