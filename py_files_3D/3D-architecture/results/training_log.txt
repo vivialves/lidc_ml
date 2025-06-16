@@ -1,0 +1,128 @@
+
+
+==== Training started at 2025-06-15 14:49:03.404759 ====
+
+Using Gradient Accumulation with 4 steps.
+DataLoader batch size: 1
+Effective batch size: 4
+
+Epoch 1/50
+Train Loss: 0.6934 | Train Acc: 51.43%
+Val Loss: 0.6879 | Val Acc: 53.59%
+Precision: 0.7619 | Recall: 0.5261 | F1 Score: 0.3933
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 1: 93
+Label distribution in training epoch: Counter({1: 2902, 0: 2678})
+
+Validation loss improved. Saving best model to /home/vivianea/projects/BrainInnov/models/best_model_3D_architecture.pth
+
+Epoch 2/50
+Train Loss: 0.6888 | Train Acc: 54.44%
+Val Loss: 0.6787 | Val Acc: 57.40%
+Precision: 0.7754 | Recall: 0.5540 | F1 Score: 0.4526
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 2: 93
+Label distribution in training epoch: Counter({1: 2820, 0: 2760})
+
+Validation loss improved. Saving best model to /home/vivianea/projects/BrainInnov/models/best_model_3D_architecture.pth
+
+Epoch 3/50
+Train Loss: 0.6766 | Train Acc: 59.14%
+Val Loss: 0.6850 | Val Acc: 49.69%
+Precision: 0.4976 | Recall: 0.4978 | F1 Score: 0.4859
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 3: 93
+Label distribution in training epoch: Counter({1: 2792, 0: 2788})
+
+Validation loss did not improve. Patience: 1/6
+
+Epoch 4/50
+Train Loss: 0.6586 | Train Acc: 61.76%
+Val Loss: 0.6704 | Val Acc: 56.25%
+Precision: 0.7676 | Recall: 0.5593 | F1 Score: 0.4546
+Current AMP scale: 16384.0
+Unique augmented volumes seen in epoch 4: 93
+Label distribution in training epoch: Counter({0: 2807, 1: 2773})
+
+Validation loss improved. Saving best model to /home/vivianea/projects/BrainInnov/models/best_model_3D_architecture.pth
+
+Epoch 5/50
+Train Loss: 0.6304 | Train Acc: 64.37%
+Val Loss: 0.6602 | Val Acc: 63.96%
+Precision: 0.6423 | Recall: 0.6360 | F1 Score: 0.6339
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 5: 93
+Label distribution in training epoch: Counter({0: 2818, 1: 2762})
+
+Validation loss improved. Saving best model to /home/vivianea/projects/BrainInnov/models/best_model_3D_architecture.pth
+
+Epoch 6/50
+Train Loss: 0.5651 | Train Acc: 70.99%
+Val Loss: 0.6784 | Val Acc: 50.42%
+Precision: 0.5042 | Recall: 0.5042 | F1 Score: 0.5030
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 6: 93
+Label distribution in training epoch: Counter({0: 2809, 1: 2771})
+
+Validation loss did not improve. Patience: 1/6
+
+Epoch 7/50
+Train Loss: 0.4268 | Train Acc: 81.76%
+Val Loss: 0.7389 | Val Acc: 49.22%
+Precision: 0.4585 | Recall: 0.4866 | F1 Score: 0.3845
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 7: 93
+Label distribution in training epoch: Counter({0: 2821, 1: 2759})
+
+Validation loss did not improve. Patience: 2/6
+
+Epoch 8/50
+Train Loss: 0.2594 | Train Acc: 90.05%
+Val Loss: 0.9207 | Val Acc: 61.77%
+Precision: 0.6806 | Recall: 0.6089 | F1 Score: 0.5713
+Current AMP scale: 1024.0
+Unique augmented volumes seen in epoch 8: 93
+Label distribution in training epoch: Counter({0: 2820, 1: 2760})
+
+Validation loss did not improve. Patience: 3/6
+
+Epoch 9/50
+Train Loss: 0.1355 | Train Acc: 95.54%
+Val Loss: 0.9183 | Val Acc: 58.18%
+Precision: 0.5853 | Recall: 0.5845 | F1 Score: 0.5814
+Current AMP scale: 1024.0
+Unique augmented volumes seen in epoch 9: 93
+Label distribution in training epoch: Counter({0: 2801, 1: 2779})
+
+Validation loss did not improve. Patience: 4/6
+
+Epoch 10/50
+Train Loss: 0.0770 | Train Acc: 97.62%
+Val Loss: 0.9386 | Val Acc: 62.45%
+Precision: 0.6439 | Recall: 0.6148 | F1 Score: 0.6000
+Current AMP scale: 512.0
+Unique augmented volumes seen in epoch 10: 93
+Label distribution in training epoch: Counter({0: 2863, 1: 2717})
+
+Validation loss did not improve. Patience: 5/6
+
+Epoch 11/50
+Train Loss: 0.0608 | Train Acc: 97.97%
+Val Loss: 3.2106 | Val Acc: 54.43%
+Precision: 0.7584 | Recall: 0.5554 | F1 Score: 0.4405
+Current AMP scale: 512.0
+Unique augmented volumes seen in epoch 11: 93
+Label distribution in training epoch: Counter({0: 2796, 1: 2784})
+
+Validation loss did not improve. Patience: 6/6
+
+Early stopping triggered after 11 epochs.
+
+
+Training complete.
+Loading best model from /home/vivianea/projects/BrainInnov/models/best_model_3D_architecture.pth for final metrics.
+######## Training Finished in 3h 16m 22s ###########
+Test Accuracy on 1920 images: 48.80%
+AUC: 0.6391
+Class 0-non-cancer: Precision: 0.70, Recall: 0.53, F1-Score: 0.60
+Class 1-cancer: Precision: 0.58, Recall: 0.74, F1-Score: 0.65
