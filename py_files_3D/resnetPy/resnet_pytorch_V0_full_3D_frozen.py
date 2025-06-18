@@ -91,7 +91,7 @@ AUG_PER_CLASS = {"train": 0, "val": 0, "test": 0}
 
 IMAGE_SIZE_SUMMARY = 256
 
-NUM_AUG_PER_SAMPLE = 65
+NUM_AUG_PER_SAMPLE = 95
 
 LOG_FILE = "training_log.txt"
 
@@ -354,7 +354,6 @@ for idx, count in label_counts.items():
 
 from torchvision.models.video import r3d_18
 
-# Model Definition
 class AttentionBlock(nn.Module):
     def __init__(self, in_channels):
         super(AttentionBlock, self).__init__()
@@ -377,7 +376,6 @@ class Resnet3DClassifierPy(nn.Module):
         self.backbone.stem[0] = nn.Conv3d(1, 64, kernel_size=(3, 7, 7), stride=(1, 2, 2), padding=(1, 3, 3))
         self.attn = AttentionBlock(in_channels=512)
         self.backbone.fc = nn.Identity()
-        self.dropout = nn.Dropout(0.3)
         self.fc = nn.Linear(512, num_classes)
 
     def forward(self, x):
