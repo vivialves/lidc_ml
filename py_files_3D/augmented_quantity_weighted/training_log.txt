@@ -1,0 +1,26 @@
+
+
+==== Sampling started at 2025-06-19 15:25:41.327134 ====
+
+
+Class 0: 558 samples
+Class 1: 465 samples
+######## Training Finished in 0h 45m 2s ###########
+
+
+==== Sampling started at 2025-06-19 16:11:42.194998 ====
+
+
+
+
+==== Sampling started at 2025-06-19 16:27:06.784543 ====
+
+
+Class 0: 46 samples
+Class 1: 47 samples
+######## Training Finished in 0h 4m 5s ###########
+
+
+==== Sampling started at 2025-06-19 16:31:56.802651 ====
+
+
