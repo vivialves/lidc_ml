@@ -2,50 +2,39 @@
 #-------------------------------------------------  CNN -3D Architecture--------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-
-
 import os
 import time
 import random
-import cv2
-import pydicom
 import hashlib
-import csv
 import collections
 
 import torch
-import torchvision
 
-import SimpleITK as sitk
 import pandas as pd
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
 import matplotlib.pyplot as plt
 
-from collections import defaultdict, Counter
+from collections import Counter
 from datetime import datetime
-from sklearn.model_selection import train_test_split
 from tqdm import tqdm
-from glob import glob
-from PIL import Image
 
-from monai.transforms import (
-    Compose, Resize, LoadImaged, RepeatChanneld, ScaleIntensity, ResizeWithPadOrCropd, ToTensord,
-    RandGaussianNoise, RandAdjustContrast, RandGaussianSmooth, Rand3DElasticd, RandBiasField, 
-    RandCropByPosNegLabeld, Resized, RandFlip, RandAffine, Compose, Resize, RandRotate, RandZoom
-)
+from monai.transforms import (Compose, 
+                              Resize, 
+                              RandAdjustContrast, 
+                              RandBiasField, 
+                              RandFlip, 
+                              RandAffine, 
+                              RandRotate, 
+                              RandZoom)
 
 from torch.amp import autocast, GradScaler
 from monai.data import DataLoader, Dataset
 from collections import Counter
-from torchvision import models
-from torchinfo import summary
-from torchvision import datasets, transforms
-from torch.utils.data import random_split, DataLoader, Dataset, WeightedRandomSampler
+from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
 from torchmetrics.classification import MulticlassConfusionMatrix, MulticlassPrecision, MulticlassRecall, MulticlassF1Score
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report, roc_auc_score, roc_curve
+from sklearn.metrics import ConfusionMatrixDisplay, roc_auc_score, roc_curve
 
 
 
@@ -77,13 +66,13 @@ SEED = 42
 VAL_RATIO = 0.2
 TEST_RATIO = 0.2
 
-PATH_TRAIN = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/train'
-PATH_TEST = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/test'
-PATH_VAL = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/val'
+PATH_TRAIN = '/home/vivianea/projects/BrainInnov/data/npy_3D_augmented/train'
+PATH_TEST = '/home/vivianea/projects/BrainInnov/data/npy_3D_augmented/test'
+PATH_VAL = '/home/vivianea/projects/BrainInnov/data/npy_3D_augmented/val'
 
-CSV_TRAIN = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/train_index.csv'
-CSV_TEST = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/test_index.csv'
-CSV_VAL = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/val_index.csv'
+CSV_TRAIN = '/home/vivianea/projects/BrainInnov/data/npy_3D_augmented/train_index.csv'
+CSV_TEST = '/home/vivianea/projects/BrainInnov/data/npy_3D_augmented/test_index.csv'
+CSV_VAL = '/home/vivianea/projects/BrainInnov/data/npy_3D_augmented/val_index.csv'
 
 PATH_MODEL = '/home/vivianea/projects/BrainInnov/models/best_model_3D_architecture.pth'
 
@@ -92,7 +81,7 @@ PATH_RESULTS = "/home/vivianea/projects/BrainInnov/py_files_3D/3D-architecture/r
 CLASS_MAP = {'cancer': 0, 'non-cancer': 1}
 INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
 
-IMAGE_SIZE_SUMMARY = 128
+IMAGE_SIZE_SUMMARY = 256
 
 NUM_AUG_PER_SAMPLE = 3
 
