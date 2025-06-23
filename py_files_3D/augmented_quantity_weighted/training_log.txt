@@ -1,26 +1,74 @@
 
 
-==== Sampling started at 2025-06-19 15:25:41.327134 ====
+==== Sampling started at 2025-06-20 11:49:35.485212 ====
 
 
-Class 0: 558 samples
-Class 1: 465 samples
-######## Training Finished in 0h 45m 2s ###########
+Class 0: 10203 samples
+Class 1: 10257 samples
+######## Training Finished in 5h 44m 4s ###########
+
+==== Sampling started at 2025-06-20 11:35:59.842433 ====
 
 
-==== Sampling started at 2025-06-19 16:11:42.194998 ====
+Class 0: 9706 samples
+Class 1: 9824 samples
+######## Training Finished in 0h 49m 44s ###########
+
+==== Sampling started at 2025-06-21 13:00:29.648413 ====
+
+
+Class 0: 8887 samples
+Class 1: 8783 samples
+######## Training Finished in 0h 5m 20s ###########
+
+
+==== Sampling started at 2025-06-21 13:14:00.247352 ====
+
+
+Class 0: 9208 samples
+Class 1: 9392 samples
+######## Training Finished in 0h 4m 48s ###########
+
+
+
+==== Sampling started at 2025-06-21 15:07:41.278960 ====
+
+Suggested LR: 1.05E-02 3D-architecture
+######## Training LR Finished in 0h 33m 56s ###########
+
+
+==== Sampling started at 2025-06-21 15:45:55.842522 ====
+
+Suggested LR: 6.28E-01  densenet
+######## Training LR Finished in 0h 40m 13s ###########
+
+
+==== Sampling started at 2025-06-21 16:28:45.415724 ====
+
+Suggested LR: 1.26E-02  efficientnet
+######## Training LR Finished in 0h 6m 30s ###########
+
+
+==== Sampling started at 2025-06-21 16:38:31.267770 ====
+
+Suggested LR: 1.05E-02 resnest seblock
+######## Training LR Finished in 0h 32m 23s ###########
 
 
 
 
-==== Sampling started at 2025-06-19 16:27:06.784543 ====
+==== Sampling started at 2025-06-21 17:13:17.113159 ====
+Suggested LR: 1.05E-02 resnet attentionblock
 
 
-Class 0: 46 samples
-Class 1: 47 samples
-######## Training Finished in 0h 4m 5s ###########
+
+==== Sampling started at 2025-06-21 17:54:55.754242 ====
+
+Suggested LR: 5.21E-01 densenet
+######## Training LR Finished in 0h 5m 39s ###########
 
 
-==== Sampling started at 2025-06-19 16:31:56.802651 ====
+==== Sampling started at 2025-06-22 13:36:19.326077 ====
 
-
+Suggested LR: 4.33E-01 densenet
+######## Training LR Finished in 0h 5m 34s ###########
