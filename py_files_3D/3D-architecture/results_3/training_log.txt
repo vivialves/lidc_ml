@@ -1,0 +1,28 @@
+
+
+==== Training started at 2025-06-21 12:07:03.769292 ====
+
+Using Gradient Accumulation with 4 steps.
+DataLoader batch size: 1
+Effective batch size: 4
+
+Epoch 1/50
+Train Loss: 0.6873 | Train Acc: 53.73%
+Val Loss: 0.6645 | Val Acc: 51.22%
+Precision: 0.5151 | Recall: 0.5110 | F1 Score: 0.4765
+Current AMP scale: 16384.0
+Unique augmented volumes seen in epoch 1: 93
+Label distribution in training epoch: Counter({1: 9986, 0: 9544})
+
+Validation loss improved. Saving best model to /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_3D_architecture.pth
+
+Epoch 2/50
+Train Loss: 0.4131 | Train Acc: 81.40%
+Val Loss: 1.9639 | Val Acc: 57.35%
+Precision: 0.7674 | Recall: 0.5815 | F1 Score: 0.4886
+Current AMP scale: 1024.0
+Unique augmented volumes seen in epoch 2: 93
+Label distribution in training epoch: Counter({1: 9843, 0: 9687})
+
+Validation loss did not improve. Patience: 1/5
+
