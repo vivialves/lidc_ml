@@ -1,13 +1,9 @@
-
-#---------------------------------------------------------------------------------------------------------------------------------------
-#-------------------------------------------------  Plot quantity after Weighted sampling ----------------------------------------------
-#---------------------------------------------------------------------------------------------------------------------------------------
-
 import os
 import time
 import random
 
 import torch
+import torch.nn as nn
 
 import pandas as pd
 import numpy as np
@@ -27,9 +23,12 @@ from monai.transforms import (Compose,
                               RandZoom)
 
 from monai.data import DataLoader, Dataset
-from monai.data import SmartCacheDataset
+from monai.data import CacheDataset
 from collections import Counter
 from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
+from torch.utils.data import DataLoader
+from torch_lr_finder import LRFinder # No need for TrainDataLoaderIter directly here
+import matplotlib.pyplot as plt
 
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  GPU Information --------------------------------------------------------------------
@@ -170,6 +169,7 @@ frozen_dataset_train = FrozenAugmentedDataset(train_dataset)
 frozen_dataset_val = FrozenAugmentedDataset(val_dataset)
 frozen_dataset_test = FrozenAugmentedDataset(test_dataset)
 
+
 def seed_worker(worker_id):
     worker_seed = torch.initial_seed() % 2**32
     np.random.seed(worker_seed)
@@ -218,45 +218,88 @@ sampler_test = WeightedRandomSampler(samples_weight, num_samples=num_samples, re
 
 test_loader = DataLoader(frozen_dataset_test, batch_size=BATCH_SIZE, num_workers=0, sampler=sampler_test, worker_init_fn=seed_worker, generator=g)
 
+#---------------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------------------  Architecture -----------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------------
+
+from monai.networks.nets import DenseNet121
+
+# --- Squeeze-and-Excitation Block ---
+class SEBlock(nn.Module):
+    def __init__(self, channels, reduction=16):
+        super(SEBlock, self).__init__()
+        self.pool = nn.AdaptiveAvgPool3d(1)
+        self.fc = nn.Sequential(
+            nn.Linear(channels, channels // reduction, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Linear(channels // reduction, channels, bias=False),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        b, c, _, _, _ = x.size()
+        y = self.pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1, 1, 1)
+        return x * y.expand_as(x)
+
+# --- DenseNet121 with SE and Dropout ---
+class DenseNet3DWithSE(nn.Module):
+    def __init__(self, in_channels=1, out_channels=2, dropout_rate=0.3, reduction=16):
+        super(DenseNet3DWithSE, self).__init__()
+        self.densenet = DenseNet121(
+            spatial_dims=3,
+            in_channels=in_channels,
+            out_channels=out_channels
+        )
+        self.se = SEBlock(channels=1024, reduction=reduction)  # 1024 is the output from DenseNet121's final feature map
+        self.dropout = nn.Dropout(p=dropout_rate)
+
+    def forward(self, x):
+        x = self.densenet.features(x)
+        x = self.se(x)
+        x = self.dropout(x)
+        x = self.densenet.class_layers(x)
+        return x
+
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+model = DenseNet3DWithSE() # Binary classification
+model = model.to(device)  # If using GPU
+
+criterion = torch.nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-4)
 
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  Weighted Sampler quantity samples ---------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
+lr_finder = LRFinder(model, optimizer, criterion, device="cuda") # Or "cuda" if you have GPU
 
+# Run the range test
+lr_finder.range_test(train_loader, end_lr=1.0, num_iter=100) # Use more iterations for better curve
 
-
-# Collect labels from one full pass through the train_loader
-sampled_labels = []
-
-for i, (img, label) in enumerate(train_loader):
-    sampled_labels.extend(label.cpu().numpy().astype(int))  # Convert to int (0 or 1)
-    if i >= len(train_loader):  # Only loop once through the loader
-        break
-
-# Count label occurrences
-label_counts = Counter(sampled_labels)
-
-# Print result
-print("Sampled label distribution from WeightedRandomSampler:")
-for label in sorted(label_counts.keys()):
-    print_count_labels = f"Class {label}: {label_counts[label]} samples"
-    print(print_count_labels)
-    log_message(print_count_labels)
-
-# Optional: plot
-plt.bar(label_counts.keys(), label_counts.values(), tick_label=["Non-cancer", "Cancer"])
-plt.xlabel("Class")
-plt.ylabel("Sample Count")
-plt.title("Sample Distribution from WeightedRandomSampler")
-filepath = os.path.join(SAVE_DIR, f"Samples_quantity.png")
+# Plot the results
+lr_finder.plot()
+plt.title("Learning Rate Finder Plot")
+filepath = os.path.join(SAVE_DIR, f"Learning_Rate_Finder_Plot.png")
 plt.savefig(filepath)
 plt.show()
+
+# Reset the model and optimizer
+lr_finder.reset()
+
 
 elapsed = time.time() - t1
 hours, rem = divmod(elapsed, 3600)
 minutes, seconds = divmod(rem, 60)
 
-summary_ = f"######## Training Finished in {int(hours)}h {int(minutes)}m {int(seconds)}s ###########"
+summary_ = f"######## Training LR Finished in {int(hours)}h {int(minutes)}m {int(seconds)}s ###########"
 print(summary_)
 log_message(summary_)
+# Initialize LRFinder WITHOUT the dataloader_iter argument
+
+
+
+
+

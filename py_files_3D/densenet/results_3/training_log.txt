@@ -1,0 +1,54 @@
+
+
+==== Training started at 2025-06-22 09:19:21.980001 ====
+
+Using Gradient Accumulation with 4 steps.
+DataLoader batch size: 1
+Effective batch size: 4
+
+
+
+==== Training started at 2025-06-22 09:40:18.317017 ====
+
+Using Gradient Accumulation with 4 steps.
+DataLoader batch size: 1
+Effective batch size: 4
+
+
+
+==== Training started at 2025-06-22 09:52:52.276141 ====
+
+Using Gradient Accumulation with 4 steps.
+DataLoader batch size: 1
+Effective batch size: 4
+
+Epoch 1/50
+Train Loss: nan | Train Acc: 50.39%
+Val Loss: nan | Val Acc: 52.25%
+Precision: 0.2612 | Recall: 0.5000 | F1 Score: 0.3432
+Current AMP scale: 0.0
+Unique augmented volumes seen in epoch 1: 93
+Label distribution in training epoch: Counter({0: 9814, 1: 9716})
+
+Validation loss did not improve. Patience: 1/6
+
+Epoch 2/50
+Train Loss: nan | Train Acc: 49.63%
+Val Loss: nan | Val Acc: 48.47%
+Precision: 0.2423 | Recall: 0.5000 | F1 Score: 0.3265
+Current AMP scale: 0.0
+Unique augmented volumes seen in epoch 2: 93
+Label distribution in training epoch: Counter({1: 9838, 0: 9692})
+
+Validation loss did not improve. Patience: 2/6
+
+Epoch 3/50
+Train Loss: nan | Train Acc: 49.87%
+Val Loss: nan | Val Acc: 51.22%
+Precision: 0.2561 | Recall: 0.5000 | F1 Score: 0.3387
+Current AMP scale: 0.0
+Unique augmented volumes seen in epoch 3: 93
+Label distribution in training epoch: Counter({1: 9790, 0: 9740})
+
+Validation loss did not improve. Patience: 3/6
+
