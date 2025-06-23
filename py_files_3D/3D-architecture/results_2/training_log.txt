@@ -1,0 +1,26 @@
+
+
+==== Training started at 2025-06-20 23:08:11.544903 ====
+
+Using Gradient Accumulation with 4 steps.
+DataLoader batch size: 1
+Effective batch size: 4
+
+Epoch 1/1
+Train Loss: 0.6932 | Train Acc: 51.02%
+Val Loss: 0.6914 | Val Acc: 52.74%
+Precision: 0.5388 | Recall: 0.5350 | F1 Score: 0.5189
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 1: 93
+Label distribution in training epoch: Counter({1: 9865, 0: 9665})
+
+Validation loss improved. Saving best model to /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_3D_architecture.pth
+
+
+Training complete.
+Loading best model from /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_3D_architecture.pth for final metrics.
+######## Training Finished in 2h 30m 9s ###########
+Test Accuracy on 6720 images: 55.62%
+AUC: 0.5000
+Class 0-non-cancer: Precision: 0.55, Recall: 0.38, F1-Score: 0.45
+Class 1-cancer: Precision: 0.51, Recall: 0.67, F1-Score: 0.58

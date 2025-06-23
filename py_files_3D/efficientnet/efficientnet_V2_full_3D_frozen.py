@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------------------------------------------------------------------------
-#-------------------------------------------------  CNN -3D Architecture--------------------------------------------------------------
+#-------------------------------------------------  CNN - EfficientNet - 3D CNN ------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
 import os
@@ -28,14 +28,13 @@ from monai.transforms import (Compose,
                               RandAffine, 
                               RandRotate, 
                               RandZoom)
-
+from torchinfo import summary
 from torch.amp import autocast, GradScaler
 from monai.data import DataLoader, Dataset
 from collections import Counter
 from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
 from torchmetrics.classification import MulticlassConfusionMatrix, MulticlassPrecision, MulticlassRecall, MulticlassF1Score
 from sklearn.metrics import ConfusionMatrixDisplay, roc_auc_score, roc_curve
-
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------
@@ -60,7 +59,7 @@ BATCH_SIZE = 1
 NUM_CHANNELS = 1
 DEPTH = 128
 NUM_CLASSES = 2
-PATIENCE_COUNTER = 5
+PATIENCE_COUNTER = 6
 EPOCHS = 50
 SEED = 42
 VAL_RATIO = 0.2
@@ -74,10 +73,11 @@ CSV_TRAIN = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_s
 CSV_TEST = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/test_index.csv'
 CSV_VAL = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/val_index.csv'
 
-PATH_MODEL = '/home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_3D_architecture.pth'
+PATH_MODEL = '/home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_efficientnet_pytorch3D_architecture.pth'
 
-SAVE_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/"
-PATH_RESULTS = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/3D-architecture/results"
+SAVE_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/"
+PATH_RESULTS = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/efficientnet/results"
+
 CLASS_MAP = {'cancer': 0, 'non-cancer': 1}
 INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
 
@@ -89,12 +89,13 @@ LOG_FILE = "training_log.txt"
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------
-#-------------------------------------------------  SEED ----------------------------------------------------------------------
+#-------------------------------------------------  Preprocessing ----------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
 # Set seed for reproducibility
 random.seed(SEED)
 torch.manual_seed(SEED)
+
 
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  Loading Dataset --------------------------------------------------------------------
@@ -157,8 +158,6 @@ val_dataset = LIDCDataset3D(csv_path_idx=CSV_VAL, npy_dir=PATH_VAL, transform=ge
 test_dataset = LIDCDataset3D(csv_path_idx=CSV_TEST, npy_dir=PATH_TEST, transform=get_transforms(), seed=SEED)
 
 print(f"✅ Loaded: {len(train_dataset)} train | {len(val_dataset)} val | {len(test_dataset)} test")
-
-classes = [cls for cls in train_dataset.class_to_idx.values()]
 
 class FrozenAugmentedDataset(Dataset):
     def __init__(self, base_dataset):
@@ -227,6 +226,7 @@ test_loader = DataLoader(frozen_dataset_test, batch_size=BATCH_SIZE, num_workers
 
 classes = [cls for cls in train_dataset.class_to_idx.values()]
 
+
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  Size by classes in Train Dataset ---------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
@@ -253,82 +253,37 @@ def size_by_classes(train_dataset):
 #-------------------------------------------------  Architecture -----------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-class SEBlock(nn.Module):
-    def __init__(self, channels, reduction=16):
-        super(SEBlock, self).__init__()
-        self.global_pool = nn.AdaptiveAvgPool3d(1)
-        self.fc1 = nn.Linear(channels, channels // reduction)
-        self.relu = nn.ReLU(inplace=True)
-        self.fc2 = nn.Linear(channels // reduction, channels)
-        self.sigmoid = nn.Sigmoid()
+from monai.networks.nets import EfficientNetBN
 
-    def forward(self, x):
-        b, c, d, h, w = x.size()
-        se = self.global_pool(x).view(b, c)
-        se = self.fc1(se)
-        se = self.relu(se)
-        se = self.fc2(se)
-        se = self.sigmoid(se).view(b, c, 1, 1, 1)
-        return x * se
-
-
-class ResidualSEBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, reduction=16):
+class EfficientNet3DClassifier(nn.Module):
+    def __init__(self, model_name="efficientnet-b0", in_channels=1, num_classes=2):
         super().__init__()
-        self.conv1 = nn.Conv3d(in_channels, out_channels, kernel_size=3, padding=1)
-        self.bn1 = nn.BatchNorm3d(out_channels)
-        self.relu = nn.ReLU(inplace=True)
-        self.conv2 = nn.Conv3d(out_channels, out_channels, kernel_size=3, padding=1)
-        self.bn2 = nn.BatchNorm3d(out_channels)
-        self.se = SEBlock(out_channels, reduction)
-        self.residual = nn.Conv3d(in_channels, out_channels, kernel_size=1) if in_channels != out_channels else nn.Identity()
-
-    def forward(self, x):
-        identity = self.residual(x)
-        out = self.relu(self.bn1(self.conv1(x)))
-        out = self.bn2(self.conv2(out))
-        out = self.se(out)
-        out += identity
-        out = self.relu(out)
-        return out
-
-
-class SE3DCNN(nn.Module):
-    def __init__(self, num_classes=2, dropout_rate=0.3):
-        super().__init__()
-        self.layer1 = ResidualSEBlock(1, 32)
-        self.pool1 = nn.MaxPool3d(2)
-        self.drop1 = nn.Dropout3d(dropout_rate)
-
-        self.layer2 = ResidualSEBlock(32, 64)
-        self.pool2 = nn.MaxPool3d(2)
-        self.drop2 = nn.Dropout3d(dropout_rate)
-
-        self.layer3 = ResidualSEBlock(64, 128)
-        self.pool3 = nn.AdaptiveAvgPool3d(1)
-
-        self.classifier = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(128, 64),
-            nn.ReLU(),
-            nn.Dropout(dropout_rate),
-            nn.Linear(64, num_classes)
+        self.model = EfficientNetBN(
+            model_name=model_name,
+            spatial_dims=3,
+            in_channels=in_channels,
+            pretrained=False  # or True if you want to fine-tune
+        )
+        # Replace the classifier
+        in_features = self.model._fc.in_features
+        self.model._fc = nn.Sequential(
+            nn.Dropout(p=0.3, inplace=True),
+            nn.Linear(in_features, num_classes)
         )
 
     def forward(self, x):
-        x = self.drop1(self.pool1(self.layer1(x)))
-        x = self.drop2(self.pool2(self.layer2(x)))
-        x = self.pool3(self.layer3(x))
-        x = self.classifier(x)
-        return x
+        return self.model(x)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model = SE3DCNN(num_classes=2)
+model = EfficientNet3DClassifier() # Binary classification
 model = model.to(device)  # If using GPU
 
 criterion = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=1.05E-02, weight_decay=1e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=1.26E-02, weight_decay=1e-4)
+
+summary(model, input_size=(BATCH_SIZE, NUM_CHANNELS, DEPTH, IMAGE_SIZE_SUMMARY, IMAGE_SIZE_SUMMARY))
+
 
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  Training ---------------------------------------------------------------------------
@@ -772,8 +727,8 @@ for i, name in enumerate(classes):
 try:
     # 2. Instantiate your model class
     # Pass the SAME in_channels and out_channels that you used during training.
-    model = SE3DCNN(num_classes=2)
-    print(f"Instantiated CNN-3D")
+    model = EfficientNet3DClassifier()
+    print(f"Instantiated EfficientNet3D-Pytorch")
 
     # 3. Load the state_dict
     state_dict = torch.load(PATH_MODEL)
@@ -897,8 +852,8 @@ class GradCAM3D:
 
 #####################################################  GRADCAM Cancer ###################################################################
 
-# Choose target layer (last conv in 3D-CNN)
-target_layer = model.layer3
+# Choose target layer (last conv in EfficientNet_3D Pytorch CNN)
+target_layer = model.model._conv_head
 
 # Initialize GradCAM
 grad_cam = GradCAM3D(model, target_layer)
@@ -912,8 +867,8 @@ grad_cam.visualize(image, cam, predicted_class, lab='cancer')
 
 #####################################################  GRADCAM Non-Cancer ###################################################################
 
-# Choose target layer (last conv in 3D-CNN)
-target_layer = model.layer3
+# Choose target layer (last conv in EfficientNet_3D Pytorch CNN)
+target_layer = model.model._conv_head
 
 # Initialize GradCAM
 grad_cam = GradCAM3D(model, target_layer)
