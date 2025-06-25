@@ -72,3 +72,109 @@ Suggested LR: 5.21E-01 densenet
 
 Suggested LR: 4.33E-01 densenet
 ######## Training LR Finished in 0h 5m 34s ###########
+
+
+Optimization finished!
+Number of finished trials: 15
+Number of pruned trials: 6
+Number of complete trials: 9
+
+Best trial:
+  Value (validation accuracy): 0.9148
+  Best hyperparameters:
+    lr: 0.002582040900338547
+    optimizer: Adam
+    batch_size: 128
+    epochs: 8
+    weight_decay: 6.6100063083176406e-06
+    gradient_clipping_norm: 1.6
+    n_conv_layers: 3
+    n_channels_l0: 64
+    n_channels_l1: 64
+    n_channels_l2: 64
+    kernel_size: 5
+    n_fc_units: 64
+
+
+==== Sampling started at 2025-06-23 16:59:48.629228 ====
+
+
+
+
+==== Sampling started at 2025-06-23 17:09:48.309081 ====
+
+
+
+
+==== Sampling started at 2025-06-23 17:49:44.940333 ====
+
+
+
+
+==== Sampling started at 2025-06-23 22:12:22.938295 ====
+
+
+
+
+==== Sampling started at 2025-06-23 22:14:46.475157 ====
+
+
+Starting Optuna optimization for DenseNet3DWithSE...
+
+Optimization finished!
+Number of finished trials: 102
+Number of pruned trials: 83
+Number of complete trials: 17
+
+Best trial:FrozenTrial(number=13, state=1, values=[0.59375], datetime_start=datetime.datetime(2025, 6, 23, 18, 10, 34, 42409), datetime_complete=datetime.datetime(2025, 6, 23, 18, 13, 2, 430662), params={'lr': 0.0008706813288803074, 'optimizer': 'Adam', 'batch_size': 4, 'epochs': 16, 'weight_decay': 1.3139913047741598e-06, 'gradient_clipping_norm': 0.1, 'se_reduction': 32, 'dropout_rate': 0.2}, user_attrs={}, system_attrs={}, intermediate_values={0: 0.625, 1: 0.40625, 2: 0.5625, 3: 0.4375, 4: 0.4375, 5: 0.5, 6: 0.5625, 7: 0.4375, 8: 0.40625, 9: 0.5, 10: 0.46875, 11: 0.5, 12: 0.4375, 13: 0.4375, 14: 0.53125, 15: 0.59375}, distributions={'lr': FloatDistribution(high=0.01, log=True, low=1e-05, step=None), 'optimizer': CategoricalDistribution(choices=('Adam', 'RMSprop', 'SGD')), 'batch_size': CategoricalDistribution(choices=(1, 2, 4, 8)), 'epochs': IntDistribution(high=20, log=False, low=5, step=1), 'weight_decay': FloatDistribution(high=0.001, log=True, low=1e-06, step=None), 'gradient_clipping_norm': FloatDistribution(high=5.0, log=False, low=0.1, step=0.1), 'se_reduction': IntDistribution(high=32, log=False, low=8, step=4), 'dropout_rate': FloatDistribution(high=0.5, log=False, low=0.1, step=0.1)}, trial_id=14, value=None)
+    lr: 0.0008706813288803074
+    optimizer: Adam
+    batch_size: 4
+    epochs: 16
+    weight_decay: 1.3139913047741598e-06
+    gradient_clipping_norm: 0.1
+    se_reduction: 32
+    dropout_rate: 0.2
+######## Training LR Finished in 0h 19m 57s ###########
+
+
+==== Sampling started at 2025-06-23 22:58:06.172125 ====
+
+
+
+
+==== Sampling started at 2025-06-23 22:59:53.331756 ====
+
+
+Starting Optuna optimization for DenseNet3DWithSE...
+
+Optimization finished!
+Number of finished trials: 152
+Number of pruned trials: 129
+Number of complete trials: 21
+
+Best trial:FrozenTrial(number=136, state=1, values=[0.625], datetime_start=datetime.datetime(2025, 6, 23, 23, 31, 47, 908732), datetime_complete=datetime.datetime(2025, 6, 23, 23, 39, 24, 955096), params={'lr': 8.755555203567309e-05, 'optimizer': 'RMSprop', 'batch_size': 4, 'epochs': 20, 'weight_decay': 0.00041708151070692377, 'gradient_clipping_norm': 2.1, 'se_reduction': 12, 'dropout_rate': 0.1}, user_attrs={}, system_attrs={}, intermediate_values={0: 0.75, 1: 0.40625, 2: 0.3125, 3: 0.46875, 4: 0.5, 5: 0.375, 6: 0.3125, 7: 0.4375, 8: 0.375, 9: 0.5, 10: 0.375, 11: 0.53125, 12: 0.625, 13: 0.625, 14: 0.46875, 15: 0.53125, 16: 0.625, 17: 0.6875, 18: 0.5, 19: 0.625}, distributions={'lr': FloatDistribution(high=0.01, log=True, low=1e-05, step=None), 'optimizer': CategoricalDistribution(choices=('Adam', 'RMSprop', 'SGD')), 'batch_size': CategoricalDistribution(choices=(1, 2, 4, 8)), 'epochs': IntDistribution(high=20, log=False, low=5, step=1), 'weight_decay': FloatDistribution(high=0.001, log=True, low=1e-06, step=None), 'gradient_clipping_norm': FloatDistribution(high=5.0, log=False, low=0.1, step=0.1), 'se_reduction': IntDistribution(high=32, log=False, low=8, step=4), 'dropout_rate': FloatDistribution(high=0.5, log=False, low=0.1, step=0.1)}, trial_id=137, value=None)
+    lr: 8.755555203567309e-05
+    optimizer: RMSprop
+    batch_size: 4
+    epochs: 20
+    weight_decay: 0.00041708151070692377
+    gradient_clipping_norm: 2.1
+    se_reduction: 12
+    dropout_rate: 0.1
+######## Training LR Finished in 0h 46m 58s ###########
+
+
+==== Sampling started at 2025-06-24 00:37:09.454675 ====
+
+
+
+
+==== Sampling started at 2025-06-24 00:38:26.994957 ====
+
+
+
+
+==== Sampling started at 2025-06-24 00:38:52.374636 ====
+
+
