@@ -42,6 +42,10 @@ from sklearn.metrics import ConfusionMatrixDisplay, roc_auc_score, roc_curve
 #-------------------------------------------------  GPU Information --------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
+
+os.environ["TORCH_MKL_DNN_ENABLED"] = "0"
+torch.backends.mkldnn.enabled = False
+
 if torch.cuda.is_available():
     device = torch.device("cuda")
     print("PyTorch is using GPU!")
@@ -157,7 +161,7 @@ val_dataset = LIDCDataset3D(csv_path_idx=CSV_VAL, npy_dir=PATH_VAL, transform=ge
 test_dataset = LIDCDataset3D(csv_path_idx=CSV_TEST, npy_dir=PATH_TEST, transform=get_transforms(), seed=SEED)
 
 print(f"✅ Loaded: {len(train_dataset)} train | {len(val_dataset)} val | {len(test_dataset)} test")
-
+'''
 classes = [cls for cls in train_dataset.class_to_idx.values()]
 
 class FrozenAugmentedDataset(Dataset):
@@ -226,7 +230,7 @@ sampler_test = WeightedRandomSampler(samples_weight, num_samples=num_samples, re
 test_loader = DataLoader(frozen_dataset_test, batch_size=BATCH_SIZE, num_workers=0, sampler=sampler_test, worker_init_fn=seed_worker, generator=g)
 
 classes = [cls for cls in train_dataset.class_to_idx.values()]
-
+'''
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  Size by classes in Train Dataset ---------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
@@ -324,7 +328,7 @@ class SE3DCNN(nn.Module):
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model = SE3DCNN(num_classes=2)
+model = SE3DCNN()
 model = model.to(device)  # If using GPU
 
 criterion = torch.nn.CrossEntropyLoss()
@@ -333,7 +337,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1.05E-02, weight_decay=1e-4)
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  Training ---------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
-
+'''
 def plot_augmented_volume(volume_tensor, label, index, epoch, batch_idx, save_dir="augmented_samples"):
 
     path_augmented = os.path.join(PATH_RESULTS, save_dir)
@@ -764,7 +768,7 @@ for i, name in enumerate(classes):
     print(metrics)
     log_message(metrics)
 
-
+'''
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  GRAD CAM ---------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
@@ -844,6 +848,22 @@ class GradCAM3D:
 
     def generate(self, input_tensor, target_class=None):
         input_tensor = input_tensor.unsqueeze(0)  # Add batch dim if missing
+        input_tensor = input_tensor.to(next(self.model.parameters()).device)
+        input_tensor.requires_grad = True
+
+        if hasattr(input_tensor, "as_tensor"):
+            input_tensor = input_tensor.as_tensor()
+
+        # Add batch dim if missing
+        if input_tensor.dim() == 4:  # (C, D, H, W)
+             input_tensor = input_tensor.unsqueeze(0)  # → (B, C, D, H, W)
+
+        # Optional: Resize to something manageable like (128, 256, 256)
+        input_tensor = F.interpolate(
+                       input_tensor, size=(256, 256, 256), mode="trilinear", align_corners=False
+                       ).detach()
+
+        # Move to device and set requires_grad for Grad-CAM
         input_tensor = input_tensor.to(next(self.model.parameters()).device)
         input_tensor.requires_grad = True
 
