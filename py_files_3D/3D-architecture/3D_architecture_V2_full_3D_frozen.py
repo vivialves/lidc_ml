@@ -42,10 +42,6 @@ from sklearn.metrics import ConfusionMatrixDisplay, roc_auc_score, roc_curve
 #-------------------------------------------------  GPU Information --------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-
-os.environ["TORCH_MKL_DNN_ENABLED"] = "0"
-torch.backends.mkldnn.enabled = False
-
 if torch.cuda.is_available():
     device = torch.device("cuda")
     print("PyTorch is using GPU!")
