@@ -55,10 +55,10 @@ else:
 #-------------------------------------------------  Constants -------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-IMAGE_SIZE = (256, 256, 256)
+IMAGE_SIZE = (256, 512, 512)
 BATCH_SIZE = 1
 NUM_CHANNELS = 1
-DEPTH = 128
+DEPTH = 256
 NUM_CLASSES = 2
 PATIENCE_COUNTER = 5
 EPOCHS = 50
@@ -81,9 +81,9 @@ PATH_RESULTS = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/3D-ar
 CLASS_MAP = {'cancer': 0, 'non-cancer': 1}
 INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
 
-IMAGE_SIZE_SUMMARY = 256
+IMAGE_SIZE_SUMMARY = 512
 
-NUM_AUG_PER_SAMPLE = 210
+NUM_AUG_PER_SAMPLE = 1
 
 LOG_FILE = "training_log.txt"
 
@@ -294,7 +294,7 @@ class ResidualSEBlock(nn.Module):
 
 
 class SE3DCNN(nn.Module):
-    def __init__(self, num_classes=2, dropout_rate=0.3):
+    def __init__(self, num_classes=NUM_CLASSES, dropout_rate=0.3):
         super().__init__()
         self.layer1 = ResidualSEBlock(1, 32)
         self.pool1 = nn.MaxPool3d(2)

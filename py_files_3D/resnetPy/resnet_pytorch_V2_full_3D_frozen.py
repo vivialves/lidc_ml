@@ -2,50 +2,39 @@
 #-------------------------------------------------  CNN - Resnet - 3D CNN (Pytorch) ----------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-
-
 import os
 import time
 import random
-import cv2
-import pydicom
 import hashlib
-import csv
 import collections
 
 import torch
-import torchvision
 
-import SimpleITK as sitk
 import pandas as pd
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
 import matplotlib.pyplot as plt
 
-from collections import defaultdict, Counter
+from collections import Counter
 from datetime import datetime
-from sklearn.model_selection import train_test_split
 from tqdm import tqdm
-from glob import glob
-from PIL import Image
 
-from monai.transforms import (
-    Compose, Resize, LoadImaged, RepeatChanneld, ScaleIntensity, ResizeWithPadOrCropd, ToTensord,
-    RandGaussianNoise, RandAdjustContrast, RandGaussianSmooth, Rand3DElasticd, RandBiasField, 
-    RandCropByPosNegLabeld, Resized, RandFlip, RandAffine, Compose, Resize, RandRotate, RandZoom
-)
-
+from monai.transforms import (Compose, 
+                              Resize, 
+                              RandAdjustContrast, 
+                              RandBiasField, 
+                              RandFlip, 
+                              RandAffine, 
+                              RandRotate, 
+                              RandZoom)
+from torchinfo import summary
 from torch.amp import autocast, GradScaler
 from monai.data import DataLoader, Dataset
 from collections import Counter
-from torchvision import models
-from torchinfo import summary
-from torchvision import datasets, transforms
-from torch.utils.data import random_split, DataLoader, Dataset, WeightedRandomSampler
+from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
 from torchmetrics.classification import MulticlassConfusionMatrix, MulticlassPrecision, MulticlassRecall, MulticlassF1Score
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report, roc_auc_score, roc_curve
+from sklearn.metrics import ConfusionMatrixDisplay, roc_auc_score, roc_curve
 
 
 
@@ -66,18 +55,25 @@ else:
 #-------------------------------------------------  Constants -------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-IMAGE_SIZE = (256, 256, 256)
+IMAGE_SIZE = (256, 512, 512)
 BATCH_SIZE = 1
 NUM_CHANNELS = 1
-DEPTH = 128
+DEPTH = 256
 NUM_CLASSES = 2
-PATIENCE_COUNTER = 6
+PATIENCE_COUNTER = 5
 EPOCHS = 50
 SEED = 42
 VAL_RATIO = 0.2
 TEST_RATIO = 0.2
 
-DICOM_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/data/LIDC_classes_dcm"
+PATH_TRAIN = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/train'
+PATH_TEST = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/test'
+PATH_VAL = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/val'
+
+CSV_TRAIN = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/train_index.csv'
+CSV_TEST = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/test_index.csv'
+CSV_VAL = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/val_index.csv'
+
 PATH_MODEL = '/home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_resnet_pytorch3D_architecture.pth'
 
 SAVE_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/"
@@ -89,113 +85,18 @@ AUG_PER_CLASS = {"train": 0, "val": 0, "test": 0}
 
 IMAGE_SIZE_SUMMARY = 256
 
-NUM_AUG_PER_SAMPLE = 65
+NUM_AUG_PER_SAMPLE = 1
 
 LOG_FILE = "training_log.txt"
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------
-#-------------------------------------------------  Preprocessing ----------------------------------------------------------------------
+#-------------------------------------------------  SEED -------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
 # Set seed for reproducibility
 random.seed(SEED)
 torch.manual_seed(SEED)
-
-def resize_volume(volume, target_shape):
-    resize = Resize(spatial_size=target_shape, mode="trilinear")
-    resized = resize(volume)
-    if isinstance(resized, np.ndarray):
-        return resized
-    elif hasattr(resized, "numpy"):
-        return resized.numpy()
-    else:
-        return np.asarray(resized)
-
-def normalize_volume(volume):
-    volume = np.clip(volume, -1000, 150)
-    min_val = np.min(volume)
-    max_val = np.max(volume)
-    if max_val - min_val > 0:
-        volume = (volume - min_val) / (max_val - min_val)
-    else:
-        volume = np.zeros_like(volume)
-    return volume.astype(np.float32)
-
-
-# Helper: Load and preprocess a 3D volume from a list of DICOM paths
-def load_dicom_volume(dcm_paths, target_size=IMAGE_SIZE, min_slices=3):
-    slices = []
-    for path in dcm_paths:
-        try:
-            ds = pydicom.dcmread(path, stop_before_pixels=False)
-            if hasattr(ds, 'InstanceNumber'):
-                slices.append((ds.InstanceNumber, path))
-        except Exception:
-            print(f"DICOM read failed: {path} | {e}")
-            continue
-
-    if len(slices) < min_slices:
-        return None
-
-    slices.sort(key=lambda x: x[0])
-    sorted_paths = [p for _, p in slices]
-
-    volume = []
-    for path in sorted_paths:
-        try:
-            img = sitk.ReadImage(path)
-            array = sitk.GetArrayFromImage(img)[0]  # (H, W)
-            expected_shape = (512, 512) # This is the expected shape form he dicom images, because there is different shapes that don`t correspond the right folder`
-            if array.shape == expected_shape:  
-                volume.append(array)
-        except Exception as e:
-            # print(f"Slice read failed in {path}: {e}")
-            continue
-
-    if len(volume) < min_slices:
-        return None
-    
-    volume = np.stack(volume, axis=0)  # (D, H, W)
-    volume = np.transpose(volume, (1, 2, 0))  # (H, W, D)
-    volume = normalize_volume(volume)
-        
-    volume = np.expand_dims(volume, axis = 0)  # Add channel for Resize
-    volume = resize_volume(volume, target_size)
-    # volume = volume[0]  # Remove channel dim
-    return volume.astype(np.float32)
-
-# Helper: Build patient-to-path mapping
-def build_patient_dict(base_dir):
-    class_dict = {"cancer": {}, "non-cancer": {}}
-    for cls in ["cancer", "non-cancer"]:
-        cls_path = os.path.join(base_dir, cls)
-        for root, _, files in os.walk(cls_path):
-            for fname in files:
-                if fname.endswith(".dcm"):
-                    pid = fname.split("_")[0]
-                    if pid not in class_dict[cls]:
-                        class_dict[cls][pid] = []
-                    class_dict[cls][pid].append(os.path.join(root, fname))
-    return class_dict
-
-def split_data(class_dict):
-    train, val, test = [], [], []
-    for label_name, pid_dict in class_dict.items():
-        label = 1 if label_name == "cancer" else 0
-        pids = list(pid_dict.keys())
-        train_p, test_p = train_test_split(pids, test_size=TEST_RATIO, random_state=SEED)
-        train_p, val_p = train_test_split(train_p, test_size=VAL_RATIO / (1 - TEST_RATIO), random_state=SEED)
-
-        for pid in train_p:
-            train.append((pid_dict[pid], label))
-        for pid in val_p:
-            val.append((pid_dict[pid], label))
-        for pid in test_p:
-            test.append((pid_dict[pid], label))
-
-    return train, val, test
-
 
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  Loading Dataset --------------------------------------------------------------------
@@ -203,61 +104,60 @@ def split_data(class_dict):
 
 
 class LIDCDataset3D(Dataset):
-    def __init__(self, data_list, label_map, transform=None, seed=None):
-        self.data_list = data_list  # [(paths, label), ...]
-        self.label_map = label_map
+    def __init__(self, csv_path_idx, npy_dir, transform=None, seed=None):
+        self.data = pd.read_csv(csv_path_idx)
+        self.npy_dir = npy_dir
         self.transform = transform
 
+        self.classes = sorted(self.data["label"].unique())
         self.class_to_idx = {0: "non-cancer", 1: "cancer"}
+        self.idx_to_class = {v: k for k, v in self.class_to_idx.items()}
 
         self.seed = seed
 
     def __len__(self):
-        return len(self.data_list)
+        return len(self.data)
 
     def __getitem__(self, idx):
-        if self.seed is not None:
-            # Set a deterministic seed for this item
-            seed = self.seed + idx
-            random.seed(seed)
-            np.random.seed(seed)
-            torch.manual_seed(seed)
-            
-        paths, label = self.data_list[idx]
-        vol = load_dicom_volume(paths)
-        if vol is None:
-            return self.__getitem__((idx + 1) % len(self))  # fallback
-        vol = torch.tensor(vol)
-        if self.transform:
-            vol = self.transform(vol)
+        row = self.data.iloc[idx]
+        file_path = os.path.join(self.npy_dir, row['filename'])
+        vol_image = np.load(file_path).astype(np.float32)  # e.g. (D, H, W)
 
-        label = int(label)
-        return vol, torch.tensor(label, dtype=torch.float32)
+        # Ensure shape is (C, D, H, W) with C=1 channel
+        if vol_image.ndim == 3:
+            vol_image = np.expand_dims(vol_image, axis=0)  # (1, D, H, W)
+
+        vol_image = torch.from_numpy(vol_image)
+
+        if self.transform:
+            vol_image = self.transform(vol_image)
+
+        label = int(row['label'])
+
+        return vol_image, label
     
 def get_transforms():
     return Compose([
         RandFlip(spatial_axis=0, prob=0.5),
         RandFlip(spatial_axis=1, prob=0.5),
         RandFlip(spatial_axis=2, prob=0.5),
-        RandRotate(range_x=0.2, range_y=0.2, range_z=0.2, prob=0.5),
-        RandAffine(
-            rotate_range=(0.1, 0.1, 0.1),
-            translate_range=(5, 5, 5),
-            scale_range=(0.1, 0.1, 0.1),
-            prob=0.3
-        ),
-        RandBiasField(prob=0.3),
-        RandAdjustContrast(prob=0.3, gamma=(0.7, 1.5)),
-        RandZoom(min_zoom=0.9, max_zoom=1.1, prob=0.2),
+        # RandRotate(range_x=0.2, range_y=0.2, range_z=0.2, prob=0.5),
+        # RandAffine(
+        #    rotate_range=(0.1, 0.1, 0.1),
+        #    translate_range=(5, 5, 5),
+        #    scale_range=(0.1, 0.1, 0.1),
+        #    prob=0.3
+        #),
+        # RandBiasField(prob=0.3),
+        # RandAdjustContrast(prob=0.3, gamma=(0.7, 1.5)),
+        # RandZoom(min_zoom=0.9, max_zoom=1.1, prob=0.2),
         Resize(spatial_size=IMAGE_SIZE, mode="trilinear")
     ])
 
-class_dict = build_patient_dict(DICOM_DIR)
-train_data, val_data, test_data = split_data(class_dict)
+train_dataset = LIDCDataset3D(csv_path_idx=CSV_TRAIN, npy_dir=PATH_TRAIN, transform=get_transforms(), seed=SEED)
+val_dataset = LIDCDataset3D(csv_path_idx=CSV_VAL, npy_dir=PATH_VAL, transform=get_transforms(), seed=SEED)
+test_dataset = LIDCDataset3D(csv_path_idx=CSV_TEST, npy_dir=PATH_TEST, transform=get_transforms(), seed=SEED)
 
-train_dataset = LIDCDataset3D(train_data, label_map={"cancer": 1, "non-cancer": 0}, transform=get_transforms(), seed=SEED)
-val_dataset = LIDCDataset3D(val_data, label_map={"cancer": 1, "non-cancer": 0}, transform=get_transforms(), seed=SEED)
-test_dataset = LIDCDataset3D(test_data, label_map={"cancer": 1, "non-cancer": 0}, transform=get_transforms(), seed=SEED)
 
 print(f"✅ Loaded: {len(train_dataset)} train | {len(val_dataset)} val | {len(test_dataset)} test")
 
@@ -290,7 +190,7 @@ g.manual_seed(SEED)
 #-------------------------------------------------  Weighted Sampler -------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-labels_train = [s[1] for s in train_dataset.data_list]  # Adjust if your dataset is not structured this way
+labels_train = [s[1] for s in train_dataset]  # Adjust if your dataset is not structured this way
 class_counts = Counter(labels_train)
 max_class_count = max(class_counts.values())
 num_aug_per_sample = NUM_AUG_PER_SAMPLE
@@ -302,7 +202,7 @@ sampler_train = WeightedRandomSampler(samples_weight, num_samples=num_samples, r
 
 train_loader = DataLoader(frozen_dataset_train, batch_size=BATCH_SIZE, num_workers=0, sampler=sampler_train, worker_init_fn=seed_worker, generator=g)
 
-labels_val = [s[1] for s in val_dataset.data_list]  # Adjust if your dataset is not structured this way
+labels_val = [s[1] for s in val_dataset]  # Adjust if your dataset is not structured this way
 class_counts = Counter(labels_train)
 max_class_count = max(class_counts.values())
 num_aug_per_sample = NUM_AUG_PER_SAMPLE
@@ -314,7 +214,7 @@ sampler_val = WeightedRandomSampler(samples_weight, num_samples=num_samples, rep
 
 val_loader = DataLoader(frozen_dataset_val, batch_size=BATCH_SIZE, num_workers=0, sampler=sampler_val, worker_init_fn=seed_worker, generator=g)
 
-labels_test = [s[1] for s in val_dataset.data_list]
+labels_test = [s[1] for s in val_dataset]
 class_counts = Counter(labels_train)
 max_class_count = max(class_counts.values())
 num_aug_per_sample = NUM_AUG_PER_SAMPLE
@@ -326,25 +226,29 @@ sampler_test = WeightedRandomSampler(samples_weight, num_samples=num_samples, re
 
 test_loader = DataLoader(frozen_dataset_test, batch_size=BATCH_SIZE, num_workers=0, sampler=sampler_test, worker_init_fn=seed_worker, generator=g)
 
+classes = [cls for cls in train_dataset.class_to_idx.values()]
+
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  Size by classes in Train Dataset ---------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-classes = [cls for cls in train_dataset.class_to_idx.values()]
+def size_by_classes(train_dataset):
+    
+    # Collect labels from your dataset
+    labels = [int(label) for _, label in train_dataset]
 
-# Collect labels from your dataset
-labels = [int(label) for _, label in train_dataset.data_list]
+    # Count occurrences
+    label_counts = Counter(labels)
 
-# Count occurrences
-label_counts = Counter(labels)
+    # Define your index-to-class mapping manually if needed
+    index_to_class = INDEX_TO_CLASS  # adjust if different
 
-# Define your index-to-class mapping manually if needed
-index_to_class = INDEX_TO_CLASS  # adjust if different
+    # Print counts
+    print("\nTraining set counts:")
+    for idx, count in label_counts.items():
+        print(f"Class: {index_to_class[idx]}, Count: {count}")
 
-# Print counts
-print("\nTraining set counts:")
-for idx, count in label_counts.items():
-    print(f"Class: {index_to_class[idx]}, Count: {count}")
+# size_by_classes(train_dataset)
 
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  Architecture -----------------------------------------------------------------------
@@ -371,7 +275,7 @@ class SEBlock(nn.Module):
 
 
 class Resnet3DClassifierPy(nn.Module):
-    def __init__(self, num_classes=2, dropout_rate=0.3, reduction=16):
+    def __init__(self, num_classes=NUM_CHANNELS, dropout_rate=0.3, reduction=16):
         super(Resnet3DClassifierPy, self).__init__()
         self.backbone = r3d_18(weights=None)
         self.backbone.stem[0] = nn.Conv3d(1, 64, kernel_size=(3, 7, 7), stride=(1, 2, 2), padding=(1, 3, 3))
@@ -405,7 +309,7 @@ model = Resnet3DClassifierPy() # Binary classification
 model = model.to(device)  # If using GPU
 
 criterion = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=1.05E-02, weight_decay=1e-4)
 
 summary(model, input_size=(BATCH_SIZE, NUM_CHANNELS, DEPTH, IMAGE_SIZE_SUMMARY, IMAGE_SIZE_SUMMARY))
 
