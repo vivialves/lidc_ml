@@ -54,35 +54,35 @@ else:
 #-------------------------------------------------  Constants -------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-IMAGE_SIZE = (256, 128, 128)
+IMAGE_SIZE = (256, 512, 512)
 BATCH_SIZE = 1
 NUM_CHANNELS = 1
-DEPTH = 128
+DEPTH = 256
 NUM_CLASSES = 2
-PATIENCE_COUNTER = 6
+PATIENCE_COUNTER = 5
 EPOCHS = 50
 SEED = 42
 VAL_RATIO = 0.2
 TEST_RATIO = 0.2
 
-PATH_TRAIN = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/train'
-PATH_TEST = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/test'
-PATH_VAL = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/val'
+PATH_TRAIN = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/train'
+PATH_TEST = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/test'
+PATH_VAL = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/val'
 
-CSV_TRAIN = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/train_index.csv'
-CSV_TEST = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/test_index.csv'
-CSV_VAL = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/val_index.csv'
+CSV_TRAIN = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/train_index.csv'
+CSV_TEST = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/test_index.csv'
+CSV_VAL = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/val_index.csv'
 
-PATH_MODEL = '/home/vivianea/projects/BrainInnov/models/best_model_densenet_pytorch3D_architecture.pth'
+PATH_MODEL = '/home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_densenet_pytorch3D_architecture.pth'
 
-SAVE_DIR = "/home/vivianea/projects/BrainInnov/py_files_3D/"
-PATH_RESULTS = "/home/vivianea/projects/BrainInnov/py_files_3D/densenet/results"
+SAVE_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/"
+PATH_RESULTS = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/densenet/results"
 CLASS_MAP = {'cancer': 0, 'non-cancer': 1}
 INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
 
-IMAGE_SIZE_SUMMARY = 128
+IMAGE_SIZE_SUMMARY = 256
 
-NUM_AUG_PER_SAMPLE = 210
+NUM_AUG_PER_SAMPLE = 1
 
 LOG_FILE = "training_log.txt"
 
@@ -271,7 +271,7 @@ class SEBlock(nn.Module):
 
 # --- DenseNet121 with SE and Dropout ---
 class DenseNet3DWithSE(nn.Module):
-    def __init__(self, in_channels=1, out_channels=2, dropout_rate=0.3, reduction=16):
+    def __init__(self, in_channels=1, out_channels=NUM_CLASSES, dropout_rate=0.3, reduction=16):
         super(DenseNet3DWithSE, self).__init__()
         self.densenet = DenseNet121(
             spatial_dims=3,

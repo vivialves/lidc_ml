@@ -54,10 +54,10 @@ else:
 #-------------------------------------------------  Constants -------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-IMAGE_SIZE = (256, 256, 256)
+IMAGE_SIZE = (256, 512, 512)
 BATCH_SIZE = 1
 NUM_CHANNELS = 1
-DEPTH = 128
+DEPTH = 256
 NUM_CLASSES = 2
 PATIENCE_COUNTER = 6
 EPOCHS = 50
@@ -81,9 +81,9 @@ PATH_RESULTS = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/effic
 CLASS_MAP = {'cancer': 0, 'non-cancer': 1}
 INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
 
-IMAGE_SIZE_SUMMARY = 256
+IMAGE_SIZE_SUMMARY = 512
 
-NUM_AUG_PER_SAMPLE = 210
+NUM_AUG_PER_SAMPLE = 1
 
 LOG_FILE = "training_log.txt"
 
@@ -256,7 +256,7 @@ def size_by_classes(train_dataset):
 from monai.networks.nets import EfficientNetBN
 
 class EfficientNet3DClassifier(nn.Module):
-    def __init__(self, model_name="efficientnet-b0", in_channels=1, num_classes=2):
+    def __init__(self, model_name="efficientnet-b0", in_channels=1, num_classes=NUM_CLASSES):
         super().__init__()
         self.model = EfficientNetBN(
             model_name=model_name,
