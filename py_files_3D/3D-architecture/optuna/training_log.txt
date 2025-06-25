@@ -1,0 +1,30 @@
+
+
+==== Sampling started at 2025-06-25 00:17:39.603945 ====
+
+
+Starting Optuna optimization for SE3DCNN...
+
+Optimization finished!
+Number of finished trials: 50
+Number of pruned trials: 36
+Number of complete trials: 14
+
+Best trial:FrozenTrial(number=17, state=1, values=[0.6875], datetime_start=datetime.datetime(2025, 6, 25, 0, 30, 6, 631329), datetime_complete=datetime.datetime(2025, 6, 25, 0, 32, 33, 679801), params={'lr': 1.100868544064401e-05, 'optimizer': 'RMSprop', 'batch_size': 1, 'epochs': 18, 'weight_decay': 1.3529912603647649e-06, 'gradient_clipping_norm': 2.3000000000000003, 'channels_layer1': 48, 'channels_layer2': 96, 'channels_layer3': 64, 'se_reduction_48': 16, 'dropout3d_rate1': 0.30000000000000004, 'se_reduction_96': 32, 'dropout3d_rate2': 0.4, 'se_reduction_64': 32, 'classifier_hidden_size': 64, 'classifier_dropout_rate': 0.4}, user_attrs={}, system_attrs={}, intermediate_values={0: 0.625, 1: 0.40625, 2: 0.375, 3: 0.5, 4: 0.625, 5: 0.53125, 6: 0.4375, 7: 0.46875, 8: 0.59375, 9: 0.46875, 10: 0.59375, 11: 0.4375, 12: 0.65625, 13: 0.65625, 14: 0.46875, 15: 0.46875, 16: 0.46875, 17: 0.6875}, distributions={'lr': FloatDistribution(high=0.01, log=True, low=1e-05, step=None), 'optimizer': CategoricalDistribution(choices=('Adam', 'RMSprop', 'SGD')), 'batch_size': CategoricalDistribution(choices=(1, 2, 4, 8)), 'epochs': IntDistribution(high=20, log=False, low=5, step=1), 'weight_decay': FloatDistribution(high=0.001, log=True, low=1e-06, step=None), 'gradient_clipping_norm': FloatDistribution(high=5.0, log=False, low=0.1, step=0.1), 'channels_layer1': CategoricalDistribution(choices=(16, 32, 48)), 'channels_layer2': CategoricalDistribution(choices=(32, 64, 96)), 'channels_layer3': CategoricalDistribution(choices=(64, 128, 192)), 'se_reduction_48': CategoricalDistribution(choices=(8, 16, 32)), 'dropout3d_rate1': FloatDistribution(high=0.4, log=False, low=0.1, step=0.1), 'se_reduction_96': CategoricalDistribution(choices=(8, 16, 32)), 'dropout3d_rate2': FloatDistribution(high=0.4, log=False, low=0.1, step=0.1), 'se_reduction_64': CategoricalDistribution(choices=(8, 16, 32)), 'classifier_hidden_size': CategoricalDistribution(choices=(32, 64, 128)), 'classifier_dropout_rate': FloatDistribution(high=0.5, log=False, low=0.2, step=0.1)}, trial_id=17, value=None)
+    lr: 1.100868544064401e-05
+    optimizer: RMSprop
+    batch_size: 1
+    epochs: 18
+    weight_decay: 1.3529912603647649e-06
+    gradient_clipping_norm: 2.3000000000000003
+    channels_layer1: 48
+    channels_layer2: 96
+    channels_layer3: 64
+    se_reduction_48: 16
+    dropout3d_rate1: 0.30000000000000004
+    se_reduction_96: 32
+    dropout3d_rate2: 0.4
+    se_reduction_64: 32
+    classifier_hidden_size: 64
+    classifier_dropout_rate: 0.4
+######## Training LR Finished in 0h 31m 51s ###########
