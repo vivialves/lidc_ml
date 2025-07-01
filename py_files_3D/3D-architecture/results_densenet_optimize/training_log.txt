@@ -1,0 +1,78 @@
+
+
+==== Training started at 2025-06-30 07:03:46.180221 ====
+
+Using Gradient Accumulation with 4 steps.
+DataLoader batch size: 1
+Effective batch size: 4
+
+Epoch 1/50
+Train Loss: 0.6943 | Train Acc: 50.44%
+Val Loss: 0.6930 | Val Acc: 50.92%
+Precision: 0.2546 | Recall: 0.5000 | F1 Score: 0.3374
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 1: 93
+Label distribution in training epoch: Counter({0: 6989, 1: 6961})
+
+Validation loss improved. Saving best model to /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_3D_architecture.pth
+
+Epoch 2/50
+Train Loss: 0.6931 | Train Acc: 50.59%
+Val Loss: 0.6933 | Val Acc: 48.98%
+Precision: 0.2449 | Recall: 0.5000 | F1 Score: 0.3288
+Current AMP scale: 16384.0
+Unique augmented volumes seen in epoch 2: 93
+Label distribution in training epoch: Counter({0: 7062, 1: 6888})
+
+Validation loss did not improve. Patience: 1/5
+
+Epoch 3/50
+Train Loss: 0.6927 | Train Acc: 51.31%
+Val Loss: 0.6965 | Val Acc: 49.44%
+Precision: 0.2472 | Recall: 0.5000 | F1 Score: 0.3308
+Current AMP scale: 16384.0
+Unique augmented volumes seen in epoch 3: 93
+Label distribution in training epoch: Counter({0: 6988, 1: 6962})
+
+Validation loss did not improve. Patience: 2/5
+
+Epoch 4/50
+Train Loss: 0.6875 | Train Acc: 54.24%
+Val Loss: 0.7029 | Val Acc: 52.75%
+Precision: 0.7537 | Recall: 0.5398 | F1 Score: 0.4103
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 4: 93
+Label distribution in training epoch: Counter({0: 6994, 1: 6956})
+
+Validation loss did not improve. Patience: 3/5
+
+Epoch 5/50
+Train Loss: 0.6407 | Train Acc: 63.27%
+Val Loss: 0.7576 | Val Acc: 59.83%
+Precision: 0.6123 | Recall: 0.6025 | F1 Score: 0.5909
+Current AMP scale: 1024.0
+Unique augmented volumes seen in epoch 5: 93
+Label distribution in training epoch: Counter({1: 6981, 0: 6969})
+
+Validation loss did not improve. Patience: 4/5
+
+Epoch 6/50
+Train Loss: 0.4689 | Train Acc: 78.52%
+Val Loss: 1.1095 | Val Acc: 53.38%
+Precision: 0.7579 | Recall: 0.5366 | F1 Score: 0.4086
+Current AMP scale: 512.0
+Unique augmented volumes seen in epoch 6: 93
+Label distribution in training epoch: Counter({0: 6985, 1: 6965})
+
+Validation loss did not improve. Patience: 5/5
+
+Early stopping triggered after 6 epochs.
+
+
+Training complete.
+Loading best model from /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_3D_architecture.pth for final metrics.
+######## Training Finished in 1h 16m 32s ###########
+Test Accuracy on 4800 images: 50.96%
+AUC: 0.5406
+Class 0-non-cancer: Precision: 0.51, Recall: 1.00, F1-Score: 0.68
+Class 1-cancer: Precision: 0.00, Recall: 0.00, F1-Score: 0.00
