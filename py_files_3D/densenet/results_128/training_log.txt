@@ -1,0 +1,108 @@
+
+
+==== Training started at 2025-06-29 21:55:11.233809 ====
+
+Using Gradient Accumulation with 4 steps.
+DataLoader batch size: 1
+Effective batch size: 4
+
+Epoch 1/50
+Train Loss: 5.6188 | Train Acc: 42.13%
+Val Loss: 4.8118 | Val Acc: 48.79%
+Precision: 0.2440 | Recall: 0.5000 | F1 Score: 0.3279
+Current AMP scale: 16384.0
+Unique augmented volumes seen in epoch 1: 93
+Label distribution in training epoch: Counter({0: 6986, 1: 6964})
+
+Validation loss improved. Saving best model to /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_densenet_pytorch3D_architecture.pth
+
+Epoch 2/50
+Train Loss: 4.0459 | Train Acc: 42.04%
+Val Loss: 3.1363 | Val Acc: 50.98%
+Precision: 0.2549 | Recall: 0.5000 | F1 Score: 0.3377
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 2: 93
+Label distribution in training epoch: Counter({0: 7138, 1: 6812})
+
+Validation loss improved. Saving best model to /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_densenet_pytorch3D_architecture.pth
+
+Epoch 3/50
+Train Loss: 3.4398 | Train Acc: 48.42%
+Val Loss: 3.0488 | Val Acc: 53.06%
+Precision: 0.5302 | Recall: 0.5302 | F1 Score: 0.5301
+Current AMP scale: 16384.0
+Unique augmented volumes seen in epoch 3: 93
+Label distribution in training epoch: Counter({0: 7007, 1: 6943})
+
+Validation loss improved. Saving best model to /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_densenet_pytorch3D_architecture.pth
+
+Epoch 4/50
+Train Loss: 3.0210 | Train Acc: 60.19%
+Val Loss: 2.7779 | Val Acc: 47.65%
+Precision: 0.2447 | Recall: 0.4737 | F1 Score: 0.3227
+Current AMP scale: 16384.0
+Unique augmented volumes seen in epoch 4: 93
+Label distribution in training epoch: Counter({1: 6975, 0: 6975})
+
+Validation loss improved. Saving best model to /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_densenet_pytorch3D_architecture.pth
+
+Epoch 5/50
+Train Loss: 3.0056 | Train Acc: 65.75%
+Val Loss: 3.1330 | Val Acc: 55.54%
+Precision: 0.6177 | Recall: 0.5497 | F1 Score: 0.4769
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 5: 93
+Label distribution in training epoch: Counter({1: 7002, 0: 6948})
+
+Validation loss did not improve. Patience: 1/5
+
+Epoch 6/50
+Train Loss: 2.8770 | Train Acc: 68.06%
+Val Loss: 3.7431 | Val Acc: 30.71%
+Precision: 0.2881 | Recall: 0.3077 | F1 Score: 0.2911
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 6: 93
+Label distribution in training epoch: Counter({0: 7040, 1: 6910})
+
+Validation loss did not improve. Patience: 2/5
+
+Epoch 7/50
+Train Loss: 2.9183 | Train Acc: 67.17%
+Val Loss: 4.8532 | Val Acc: 43.94%
+Precision: 0.3814 | Recall: 0.4326 | F1 Score: 0.3666
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 7: 93
+Label distribution in training epoch: Counter({0: 7076, 1: 6874})
+
+Validation loss did not improve. Patience: 3/5
+
+Epoch 8/50
+Train Loss: 2.8564 | Train Acc: 67.27%
+Val Loss: 5.0128 | Val Acc: 53.67%
+Precision: 0.5367 | Recall: 0.5367 | F1 Score: 0.5367
+Current AMP scale: 2048.0
+Unique augmented volumes seen in epoch 8: 93
+Label distribution in training epoch: Counter({1: 7004, 0: 6946})
+
+Validation loss did not improve. Patience: 4/5
+
+Epoch 9/50
+Train Loss: 2.8020 | Train Acc: 68.12%
+Val Loss: 4.6207 | Val Acc: 55.52%
+Precision: 0.5556 | Recall: 0.5555 | F1 Score: 0.5551
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 9: 93
+Label distribution in training epoch: Counter({0: 7043, 1: 6907})
+
+Validation loss did not improve. Patience: 5/5
+
+Early stopping triggered after 9 epochs.
+
+
+Training complete.
+Loading best model from /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_densenet_pytorch3D_architecture.pth for final metrics.
+######## Training Finished in 1h 22m 6s ###########
+Test Accuracy on 4800 images: 53.02%
+AUC: 0.5452
+Class 0-non-cancer: Precision: 0.00, Recall: 0.00, F1-Score: 0.00
+Class 1-cancer: Precision: 0.48, Recall: 0.95, F1-Score: 0.64

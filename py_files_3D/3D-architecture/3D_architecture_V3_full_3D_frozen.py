@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------------------------------------------------------------------------
-#-------------------------------------------------  CNN - Resnet - 3D CNN (Pytorch) ----------------------------------------------------
+#-------------------------------------------------  CNN -3D Architecture--------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
 import os
@@ -28,7 +28,7 @@ from monai.transforms import (Compose,
                               RandAffine, 
                               RandRotate, 
                               RandZoom)
-from torchinfo import summary
+
 from torch.amp import autocast, GradScaler
 from monai.data import DataLoader, Dataset
 from collections import Counter
@@ -60,7 +60,7 @@ BATCH_SIZE = 1
 NUM_CHANNELS = 1
 DEPTH = 128
 NUM_CLASSES = 2
-PATIENCE_COUNTER = 6
+PATIENCE_COUNTER = 5
 EPOCHS = 50
 SEED = 42
 VAL_RATIO = 0.2
@@ -74,15 +74,12 @@ CSV_TRAIN = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_s
 CSV_TEST = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/test_index.csv'
 CSV_VAL = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/val_index.csv'
 
-PATH_MODEL = '/home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_resnet_pytorch3D_architecture_v0.pth'
+PATH_MODEL = '/home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_3D_architecture.pth'
 
-SAVE_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/"
-PATH_RESULTS = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/resnetPy/results"
-
+SAVE_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/"
+PATH_RESULTS = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/3D-architecture/results"
 CLASS_MAP = {'cancer': 0, 'non-cancer': 1}
 INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
-
-AUG_PER_CLASS = {"train": 0, "val": 0, "test": 0}
 
 IMAGE_SIZE_SUMMARY = 256
 
@@ -91,20 +88,24 @@ NUM_AUG_PER_SAMPLE = 1
 LOG_FILE = "training_log.txt"
 
 best_params_from_optuna = {
-    'lr': 0.009905761217784408,
+    'lr': 0.00021987214242733154,
     'optimizer': 'SGD',
-    'batch_size': 1,
-    'epochs': 18,
-    'weight_decay': 0.000429724331679506,
-    'gradient_clipping_norm': 2.6,
+    'batch_size': 4,
+    'epochs': 9,
+    'weight_decay': 3.5921747194599554e-06,
+    'gradient_clipping_norm': 1.6,
+    'channels_layer1': 16,
+    'channels_layer2': 96,
+    'channels_layer3': 64,
     'attention_reduction_ratio': 8,
-    'fc_dropout_rate': 0.4,
-    'layer4_dropout_rate': 0.5
+    'dropout3d_rate1': 0.30000000000000004,
+    'dropout3d_rate2': 0.2,
+    'classifier_hidden_size': 64,
+    'classifier_dropout_rate': 0.4,
  }
 
-
 #---------------------------------------------------------------------------------------------------------------------------------------
-#-------------------------------------------------  SEED -------------------------------------------------------------------------------
+#-------------------------------------------------  SEED ----------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
 # Set seed for reproducibility
@@ -154,16 +155,16 @@ def get_transforms():
         RandFlip(spatial_axis=0, prob=0.5),
         RandFlip(spatial_axis=1, prob=0.5),
         RandFlip(spatial_axis=2, prob=0.5),
-        RandRotate(range_x=0.2, range_y=0.2, range_z=0.2, prob=0.5),
-        RandAffine(
-           rotate_range=(0.1, 0.1, 0.1),
-           translate_range=(5, 5, 5),
-           scale_range=(0.1, 0.1, 0.1),
-           prob=0.3
-        ),
-        RandBiasField(prob=0.3),
-        RandAdjustContrast(prob=0.3, gamma=(0.7, 1.5)),
-        RandZoom(min_zoom=0.9, max_zoom=1.1, prob=0.2),
+        # RandRotate(range_x=0.2, range_y=0.2, range_z=0.2, prob=0.5),
+        # RandAffine(
+        #    rotate_range=(0.1, 0.1, 0.1),
+        #    translate_range=(5, 5, 5),
+        #    scale_range=(0.1, 0.1, 0.1),
+        #    prob=0.3
+        #),
+        # RandBiasField(prob=0.3),
+        # RandAdjustContrast(prob=0.3, gamma=(0.7, 1.5)),
+        # RandZoom(min_zoom=0.9, max_zoom=1.1, prob=0.2),
         Resize(spatial_size=IMAGE_SIZE, mode="trilinear")
     ])
 
@@ -171,8 +172,9 @@ train_dataset = LIDCDataset3D(csv_path_idx=CSV_TRAIN, npy_dir=PATH_TRAIN, transf
 val_dataset = LIDCDataset3D(csv_path_idx=CSV_VAL, npy_dir=PATH_VAL, transform=get_transforms(), seed=SEED)
 test_dataset = LIDCDataset3D(csv_path_idx=CSV_TEST, npy_dir=PATH_TEST, transform=get_transforms(), seed=SEED)
 
-
 print(f"✅ Loaded: {len(train_dataset)} train | {len(val_dataset)} val | {len(test_dataset)} test")
+
+classes = [cls for cls in train_dataset.class_to_idx.values()]
 
 class FrozenAugmentedDataset(Dataset):
     def __init__(self, base_dataset):
@@ -267,8 +269,6 @@ def size_by_classes(train_dataset):
 #-------------------------------------------------  Architecture -----------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-from torchvision.models.video import r3d_18
-
 class SeAttBlock(nn.Module):
     def __init__(self, in_channels, reduction):
         super(SeAttBlock, self).__init__()
@@ -284,48 +284,80 @@ class SeAttBlock(nn.Module):
         attn = self.sigmoid(attn)
         return x * attn
 
-class Resnet3DClassifierPy(nn.Module):
-    def __init__(self, num_classes, best_attention_reduction_ratio, best_fc_dropout_rate, best_layer4_dropout_rate):
-        super(Resnet3DClassifierPy, self).__init__()
-        self.backbone = r3d_18(weights=None)
-        self.backbone.stem[0] = nn.Conv3d(1, 64, kernel_size=(3, 7, 7), stride=(1, 2, 2), padding=(1, 3, 3))
-        self.attn = SeAttBlock(in_channels=512, reduction=best_attention_reduction_ratio)
-        self.backbone.fc = nn.Identity()
-        self.dropout_layer4 = nn.Dropout3d(best_layer4_dropout_rate)
-        self.dropout_fc = nn.Dropout(best_fc_dropout_rate)
-        self.fc = nn.Linear(512, num_classes)
+
+class ResidualSEBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, reduction): # <--- Make reduction dynamic
+        super().__init__()
+        self.conv1 = nn.Conv3d(in_channels, out_channels, kernel_size=3, padding=1)
+        self.bn1 = nn.BatchNorm3d(out_channels)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv3d(out_channels, out_channels, kernel_size=3, padding=1)
+        self.bn2 = nn.BatchNorm3d(out_channels)
+        self.se = SeAttBlock(out_channels, reduction) # <--- Pass dynamic reduction
+        self.residual = nn.Conv3d(in_channels, out_channels, kernel_size=1) if in_channels != out_channels else nn.Identity()
 
     def forward(self, x):
-        x = self.backbone.stem(x)
-        x = self.backbone.layer1(x)
-        x = self.backbone.layer2(x)
-        x = self.backbone.layer3(x)
-        x = self.backbone.layer4(x)
-        x = self.dropout_layer4(x)
-        x = self.attn(x)
-        x = self.backbone.avgpool(x)
-        x = torch.flatten(x, 1)
-        x = self.dropout_fc(x)
-        x = self.fc(x)
-        return x
+        identity = self.residual(x)
+        out = self.relu(self.bn1(self.conv1(x)))
+        out = self.bn2(self.conv2(out))
+        out = self.se(out)
+        out += identity
+        out = self.relu(out)
+        return out
 
+
+class SE3DCNN(nn.Module):
+    def __init__(self, num_classes,
+                channels_layer1, channels_layer2, channels_layer3,
+                dropout3d_rate1, dropout3d_rate2, 
+                attention_reduction_ratio,
+                classifier_hidden_size, classifier_dropout_rate): # <--- Add se_reduction as argument
+        super().__init__()
+        # Pass se_reduction to each ResidualSEBlock
+        self.layer1 = ResidualSEBlock(1, channels_layer1, attention_reduction_ratio)
+        self.pool1 = nn.MaxPool3d(2)
+        self.drop1 = nn.Dropout3d(dropout3d_rate1) # <--- Use dynamic dropout_rate
+
+        self.layer2 = ResidualSEBlock(channels_layer1, channels_layer2, attention_reduction_ratio)
+        self.pool2 = nn.MaxPool3d(2)
+        self.drop2 = nn.Dropout3d(dropout3d_rate2) # <--- Use dynamic dropout_rate
+
+        self.layer3 = ResidualSEBlock(channels_layer2, channels_layer3, attention_reduction_ratio)
+        self.pool3 = nn.AdaptiveAvgPool3d(1)
+
+        self.classifier = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(channels_layer3, classifier_hidden_size),
+            nn.ReLU(),
+            nn.Dropout(classifier_dropout_rate), # <--- Use dynamic dropout_rate
+            nn.Linear(64, num_classes)
+        )
+
+    def forward(self, x):
+        x = self.drop1(self.pool1(self.layer1(x)))
+        x = self.drop2(self.pool2(self.layer2(x)))
+        x = self.pool3(self.layer3(x))
+        x = self.classifier(x)
+        return x
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model = Resnet3DClassifierPy(
-    num_classes=NUM_CLASSES,
-    best_attention_reduction_ratio=best_params_from_optuna['attention_reduction_ratio'],
-    best_fc_dropout_rate=best_params_from_optuna['fc_dropout_rate'],
-    best_layer4_dropout_rate=best_params_from_optuna['layer4_dropout_rate']
-).to(device)
+model = SE3DCNN(num_classes=NUM_CLASSES,
+                channels_layer1=best_params_from_optuna['channels_layer1'],
+                channels_layer2=best_params_from_optuna['channels_layer2'],
+                channels_layer3=best_params_from_optuna['channels_layer3'],
+                dropout3d_rate1=best_params_from_optuna['dropout3d_rate1'],
+                dropout3d_rate2=best_params_from_optuna['dropout3d_rate2'],
+                attention_reduction_ratio=best_params_from_optuna['attention_reduction_ratio'],
+                classifier_hidden_size=best_params_from_optuna['classifier_hidden_size'],
+                classifier_dropout_rate=best_params_from_optuna['classifier_dropout_rate'])
+
+model = model.to(device)  # If using GPU
 
 criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), 
                             lr = best_params_from_optuna['lr'], 
                             weight_decay=best_params_from_optuna['weight_decay'])
-
-summary(model, input_size=(BATCH_SIZE, NUM_CHANNELS, DEPTH, IMAGE_SIZE_SUMMARY, IMAGE_SIZE_SUMMARY))
-
 
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  Training ---------------------------------------------------------------------------
@@ -777,12 +809,10 @@ for i, name in enumerate(classes):
 try:
     # 2. Instantiate your model class
     # Pass the SAME in_channels and out_channels that you used during training.
-    model = Resnet3DClassifierPy(
-                num_classes=NUM_CLASSES,
-                best_attention_reduction_ratio=best_params_from_optuna['attention_reduction_ratio'],
-                best_fc_dropout_rate=best_params_from_optuna['fc_dropout_rate'],
-                best_layer4_dropout_rate=best_params_from_optuna['layer4_dropout_rate'])
-    print(f"Instantiated Resnet3D-Pytorch")
+    model = SE3DCNN(num_classes=NUM_CLASSES,
+                   dropout_rate=best_params_from_optuna['dropout_rate'],
+                   reduction=best_params_from_optuna['se_reduction'])
+    print(f"Instantiated CNN-3D")
 
     # 3. Load the state_dict
     state_dict = torch.load(PATH_MODEL)
@@ -856,6 +886,22 @@ class GradCAM3D:
         input_tensor = input_tensor.to(next(self.model.parameters()).device)
         input_tensor.requires_grad = True
 
+        if hasattr(input_tensor, "as_tensor"):
+            input_tensor = input_tensor.as_tensor()
+
+        # Add batch dim if missing
+        if input_tensor.dim() == 4:  # (C, D, H, W)
+             input_tensor = input_tensor.unsqueeze(0)  # → (B, C, D, H, W)
+
+        # Optional: Resize to something manageable like (128, 256, 256)
+        input_tensor = F.interpolate(
+                       input_tensor, size=(256, 256, 256), mode="trilinear", align_corners=False
+                       ).detach()
+
+        # Move to device and set requires_grad for Grad-CAM
+        input_tensor = input_tensor.to(next(self.model.parameters()).device)
+        input_tensor.requires_grad = True
+
         self.model.zero_grad()
         output = self.model(input_tensor)
 
@@ -906,8 +952,8 @@ class GradCAM3D:
 
 #####################################################  GRADCAM Cancer ###################################################################
 
-# Choose target layer (last conv in ResNet_3D Pytorch CNN)
-target_layer = model.backbone.layer4[-1]
+# Choose target layer (last conv in 3D-CNN)
+target_layer = model.layer3
 
 # Initialize GradCAM
 grad_cam = GradCAM3D(model, target_layer)
@@ -921,8 +967,8 @@ grad_cam.visualize(image, cam, predicted_class, lab='cancer')
 
 #####################################################  GRADCAM Non-Cancer ###################################################################
 
-# Choose target layer (last conv in ResNet_3D Pytorch CNN)
-target_layer = model.backbone.layer4[-1]
+# Choose target layer (last conv in 3D-CNN)
+target_layer = model.layer3
 
 # Initialize GradCAM
 grad_cam = GradCAM3D(model, target_layer)
