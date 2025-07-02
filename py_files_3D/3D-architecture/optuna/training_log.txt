@@ -28,3 +28,37 @@ Best trial:FrozenTrial(number=17, state=1, values=[0.6875], datetime_start=datet
     classifier_hidden_size: 64
     classifier_dropout_rate: 0.4
 ######## Training LR Finished in 0h 31m 51s ###########
+
+
+==== Sampling started at 2025-06-30 09:37:43.667283 ====
+
+
+Starting Optuna optimization for SE3DCNN...
+
+
+==== Sampling started at 2025-06-30 09:49:54.847354 ====
+
+
+Starting Optuna optimization for SE3DCNN...
+
+Optimization finished!
+Number of finished trials: 50
+Number of pruned trials: 27
+Number of complete trials: 23
+
+Best trial:FrozenTrial(number=31, state=1, values=[0.71875], datetime_start=datetime.datetime(2025, 6, 30, 10, 14, 23, 767640), datetime_complete=datetime.datetime(2025, 6, 30, 10, 15, 5, 155709), params={'lr': 0.00021987214242733154, 'optimizer': 'SGD', 'batch_size': 4, 'epochs': 9, 'weight_decay': 3.5921747194599554e-06, 'gradient_clipping_norm': 1.6, 'channels_layer1': 16, 'channels_layer2': 96, 'channels_layer3': 64, 'attention_reduction_ratio': 8, 'dropout3d_rate1': 0.30000000000000004, 'dropout3d_rate2': 0.2, 'classifier_hidden_size': 64, 'classifier_dropout_rate': 0.4}, user_attrs={}, system_attrs={}, intermediate_values={0: 0.625, 1: 0.5, 2: 0.40625, 3: 0.5, 4: 0.4375, 5: 0.65625, 6: 0.46875, 7: 0.4375, 8: 0.71875}, distributions={'lr': FloatDistribution(high=0.01, log=True, low=1e-05, step=None), 'optimizer': CategoricalDistribution(choices=('Adam', 'RMSprop', 'SGD')), 'batch_size': CategoricalDistribution(choices=(1, 2, 4, 8)), 'epochs': IntDistribution(high=20, log=False, low=5, step=1), 'weight_decay': FloatDistribution(high=0.001, log=True, low=1e-06, step=None), 'gradient_clipping_norm': FloatDistribution(high=5.0, log=False, low=0.1, step=0.1), 'channels_layer1': CategoricalDistribution(choices=(16, 32, 48)), 'channels_layer2': CategoricalDistribution(choices=(32, 64, 96)), 'channels_layer3': CategoricalDistribution(choices=(64, 128, 192)), 'attention_reduction_ratio': CategoricalDistribution(choices=(2, 4, 8, 16)), 'dropout3d_rate1': FloatDistribution(high=0.4, log=False, low=0.1, step=0.1), 'dropout3d_rate2': FloatDistribution(high=0.4, log=False, low=0.1, step=0.1), 'classifier_hidden_size': CategoricalDistribution(choices=(32, 64, 128)), 'classifier_dropout_rate': FloatDistribution(high=0.5, log=False, low=0.2, step=0.1)}, trial_id=31, value=None)
+    lr: 0.00021987214242733154
+    optimizer: SGD
+    batch_size: 4
+    epochs: 9
+    weight_decay: 3.5921747194599554e-06
+    gradient_clipping_norm: 1.6
+    channels_layer1: 16
+    channels_layer2: 96
+    channels_layer3: 64
+    attention_reduction_ratio: 8
+    dropout3d_rate1: 0.30000000000000004
+    dropout3d_rate2: 0.2
+    classifier_hidden_size: 64
+    classifier_dropout_rate: 0.4
+######## Training LR Finished in 0h 32m 13s ###########

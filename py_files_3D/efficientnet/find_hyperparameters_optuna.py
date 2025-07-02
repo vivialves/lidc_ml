@@ -54,7 +54,7 @@ else:
 #-------------------------------------------------  Constants -------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-IMAGE_SIZE = (256, 512, 512)
+IMAGE_SIZE = (128, 128, 128)
 BATCH_SIZE = 1
 NUM_CLASSES = 2
 
@@ -62,15 +62,15 @@ SEED = 42
 VAL_RATIO = 0.2
 TEST_RATIO = 0.2
 
-PATH_TRAIN = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/train'
-PATH_TEST = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/test'
-PATH_VAL = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/val'
+PATH_TRAIN = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/train'
+PATH_TEST = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/test'
+PATH_VAL = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/val'
 
-CSV_TRAIN = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/train_index.csv'
-CSV_TEST = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/test_index.csv'
-CSV_VAL = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/val_index.csv'
+CSV_TRAIN = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/train_index.csv'
+CSV_TEST = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/test_index.csv'
+CSV_VAL = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/val_index.csv'
 
-SAVE_DIR = "/home/etudiant/Projets/Viviane/LIDC-ML/lidc_ml/py_files_3D/efficientnet/optuna"
+SAVE_DIR = "/home/vivianea/projects/BrainInnov/py_files_3D/densenet/optuna"
 CLASS_MAP = {'cancer': 0, 'non-cancer': 1}
 INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
 
@@ -232,40 +232,68 @@ test_loader = DataLoader(frozen_dataset_test, batch_size=BATCH_SIZE, num_workers
 
 from monai.networks.nets import EfficientNetBN
 
+class SeAttBlock(nn.Module):
+    def __init__(self, in_channels):
+        super(SeAttBlock, self).__init__()
+        self.conv1 = nn.Conv3d(in_channels, in_channels // 2, kernel_size=1)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv3d(in_channels // 2, in_channels, kernel_size=1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        attn = self.conv1(x)
+        attn = self.relu(attn)
+        attn = self.conv2(attn)
+        attn = self.sigmoid(attn)
+        return x * attn
+
 class EfficientNet3DClassifier(nn.Module):
-    def __init__(self, trial: optuna.trial.Trial, in_channels=1, num_classes=2):
+    def __init__(self, model_name, in_channels, num_classes, classifier_dropout_rate):
         super().__init__()
-        
-        # --- Tune EfficientNetBN model_name (which variant to use) ---
-        # EfficientNet-B0 to B7 exist. B0 is smallest, B7 is largest.
-        # Larger models require more memory and training time.
-        # Start with a smaller range like B0-B3, then expand if needed.
-        # You might also consider 'efficientnet-b0', 'efficientnet-b1', etc.
-        model_name = trial.suggest_categorical('efficientnet_model_name', ["efficientnet-b0", "efficientnet-b1", "efficientnet-b2"])
-        
         self.model = EfficientNetBN(
             model_name=model_name,
             spatial_dims=3,
             in_channels=in_channels,
-            pretrained=False # Set to True if you want to use pre-trained weights for fine-tuning
+            pretrained=False
         )
-        
-        # Replace the classifier
+
+        # Extract in_features before replacing classifier
         in_features = self.model._fc.in_features
-        
-        # --- Tune the Dropout rate in the final classifier layer ---
-        # The dropout you currently have (p=0.3) is fixed. Let Optuna tune it.
-        dropout_p = trial.suggest_float('classifier_dropout_rate', 0.1, 0.5, step=0.1)
-        
+
+        # Replace classifier
         self.model._fc = nn.Sequential(
-            nn.Dropout(p=dropout_p, inplace=True), # Use the tuned dropout_p
+            nn.Dropout(p=classifier_dropout_rate, inplace=True),
             nn.Linear(in_features, num_classes)
         )
 
+        # Insert Attention block after _bn1
+        conv_head_channels = self.model._conv_head.out_channels
+        self.attention = SeAttBlock(conv_head_channels)
+
     def forward(self, x):
-        return self.model(x)
+        # Stem
+        x = self.model._conv_stem(x)
+        x = self.model._bn0(x)
+        x = self.model._swish(x)
 
+        # Blocks
+        x = self.model._blocks(x)
 
+        # Head
+        x = self.model._conv_head(x)
+        x = self.model._bn1(x)
+        x = self.model._swish(x)
+
+        # Apply Attention
+        x = self.attention(x)
+
+        # Pooling & Classifier
+        x = self.model._avg_pooling(x)
+        x = x.flatten(1)
+        x = self.model._fc(x)
+
+        return x
+ 
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  OPTUNA -----------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
@@ -284,15 +312,18 @@ def objective(trial):
     epochs = trial.suggest_int('epochs', 5, 20) # Keep low for initial testing
     weight_decay = trial.suggest_float('weight_decay', 1e-6, 1e-3, log=True)
     gradient_clipping_norm = trial.suggest_float('gradient_clipping_norm', 0.1, 5.0, step=0.1)
+    model_name = trial.suggest_categorical('model_name', ["efficientnet-b0", "efficientnet-b1", "efficientnet-b2"])
+    dropout = trial.suggest_float('dropout', 0.1, 0.5)
 
     # Get data loaders
     # train_loader, val_loader = get_data_loaders(batch_size, IMAGE_SIZE)
 
     # Initialize model with suggested hyperparameters
     model = EfficientNet3DClassifier(
-        trial=trial,
+        model_name=model_name,
         in_channels=1, # Fixed for your LIDC .npy data
-        num_classes=NUM_CLASSES # Fixed for your LIDC classification task
+        num_classes=NUM_CLASSES, # Fixed for your LIDC classification task
+        classifier_dropout_rate=dropout
     ).to(device)
 
     # Initialize optimizer
