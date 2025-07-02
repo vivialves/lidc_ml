@@ -230,33 +230,30 @@ test_loader = DataLoader(frozen_dataset_test, batch_size=BATCH_SIZE, num_workers
 #-------------------------------------------------  Architecture -----------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-class SEBlock(nn.Module):
-    # Pass trial to SEBlock if you want to tune its reduction ratio
-    def __init__(self, channels, trial: optuna.trial.Trial):
-        super(SEBlock, self).__init__()
+class SeAttBlock(nn.Module):
+    def __init__(self, in_channels, trial: optuna.trial.Trial):
+        super(SeAttBlock, self).__init__()
+        # Tune the reduction ratio for the attention block
+        # A smaller ratio means more channels in the intermediate layer,
+        # potentially more expressive but also more parameters.
+        # Common ratios are powers of 2.
+        reduction_ratio = trial.suggest_categorical('attention_reduction_ratio', [2, 4, 8, 16])
         
-        # Tune the reduction ratio for the SE block
-        # Common choices are powers of 2 (8, 16, 32)
-        reduction = trial.suggest_categorical(f'se_reduction_{channels}', [8, 16, 32])
-        
-        self.global_pool = nn.AdaptiveAvgPool3d(1)
-        self.fc1 = nn.Linear(channels, channels // reduction)
+        self.conv1 = nn.Conv3d(in_channels, in_channels // reduction_ratio, kernel_size=1)
         self.relu = nn.ReLU(inplace=True)
-        self.fc2 = nn.Linear(channels // reduction, channels)
+        self.conv2 = nn.Conv3d(in_channels // reduction_ratio, in_channels, kernel_size=1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        b, c, d, h, w = x.size()
-        se = self.global_pool(x).view(b, c)
-        se = self.fc1(se)
-        se = self.relu(se)
-        se = self.fc2(se)
-        se = self.sigmoid(se).view(b, c, 1, 1, 1)
-        return x * se
+        attn = self.conv1(x)
+        attn = self.relu(attn)
+        attn = self.conv2(attn)
+        attn = self.sigmoid(attn)
+        return x * attn
 
 
 class ResidualSEBlock(nn.Module):
-    # Pass trial to ResidualSEBlock as it contains an SEBlock
+    # Pass trial to ResidualSeAttBlock as it contains an SeAttBlock
     def __init__(self, in_channels, out_channels_suggested, trial: optuna.trial.Trial, block_idx: int):
         super().__init__()
         # Use out_channels_suggested as the actual out_channels
@@ -268,8 +265,8 @@ class ResidualSEBlock(nn.Module):
         self.conv2 = nn.Conv3d(self.out_channels, self.out_channels, kernel_size=3, padding=1)
         self.bn2 = nn.BatchNorm3d(self.out_channels)
         
-        # Pass trial to SEBlock
-        self.se = SEBlock(self.out_channels, trial)
+        # Pass trial to SeAttBlock
+        self.se = SeAttBlock(self.out_channels, trial)
         
         # Residual connection
         self.residual = nn.Conv3d(in_channels, self.out_channels, kernel_size=1) if in_channels != self.out_channels else nn.Identity()

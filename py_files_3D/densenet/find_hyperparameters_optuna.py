@@ -233,47 +233,90 @@ test_loader = DataLoader(frozen_dataset_test, batch_size=BATCH_SIZE, num_workers
 from monai.networks.nets import DenseNet121
 
 # --- Squeeze-and-Excitation Block ---
-class SEBlock(nn.Module):
-    def __init__(self, channels, reduction=16):
-        super(SEBlock, self).__init__()
-        self.pool = nn.AdaptiveAvgPool3d(1)
-        self.fc = nn.Sequential(
-            nn.Linear(channels, channels // reduction, bias=False),
-            nn.ReLU(inplace=True),
-            nn.Linear(channels // reduction, channels, bias=False),
-            nn.Sigmoid()
-        )
+class SeAttBlock(nn.Module): # Keeping your name 'SeAttBlock'
+    # The 'trial' argument should come BEFORE any arguments with default values
+    # Or, if the reduction_ratio is provided externally (as a fixed value from Optuna's best_params),
+    # then 'trial' is NOT needed here.
+    def __init__(self, in_channels, trial: optuna.trial.Trial = None, fixed_reduction_ratio: int = None):
+        super(SeAttBlock, self).__init__()
+        
+        if trial:
+            # If part of an Optuna study, tune the reduction ratio
+            # This 'attention_reduction_ratio' is distinct from 'se_reduction' in DenseNet3DWithSE
+            self.reduction_ratio = trial.suggest_categorical('attention_reduction_ratio', [2, 4, 8, 16])
+        elif fixed_reduction_ratio is not None:
+            # If using fixed best params, directly use the provided ratio
+            self.reduction_ratio = fixed_reduction_ratio
+        else:
+            # Fallback if neither trial nor fixed_reduction_ratio is provided (e.g., for testing)
+            self.reduction_ratio = 16 # Default if not specified by Optuna or fixed param
+
+        self.conv1 = nn.Conv3d(in_channels, in_channels // self.reduction_ratio, kernel_size=1)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv3d(in_channels // self.reduction_ratio, in_channels, kernel_size=1)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        b, c, _, _, _ = x.size()
-        y = self.pool(x).view(b, c)
-        y = self.fc(y).view(b, c, 1, 1, 1)
-        return x * y.expand_as(x)
+        attn = self.conv1(x)
+        attn = self.relu(attn)
+        attn = self.conv2(attn)
+        attn = self.sigmoid(attn)
+        return x * attn
 
-# --- DenseNet121 with SE and Dropout ---
+# --- DenseNet121 with Attention (SeAttBlock) and Dropout ---
 class DenseNet3DWithSE(nn.Module):
-    def __init__(self, trial, in_channels=1, out_channels=NUM_CLASSES, dropout_rate=0.3, reduction=16):
+    # 'trial' should be the first argument if it's required for hyperparameter suggestion
+    def __init__(self, trial: optuna.trial.Trial, in_channels=1, out_channels=NUM_CLASSES):
         super(DenseNet3DWithSE, self).__init__()
-        reduction = trial.suggest_int('se_reduction', 8, 32, step=4)
+        
+        # --- Tune Reduction Ratio for the SEBlock (using Optuna's suggestion) ---
+        # This will be passed down to your SeAttBlock.
+        # It's better to manage this parameter at the top-level model's __init__
+        # if it's a hyperparameter for the ENTIRE model's attention mechanism.
+        self.se_attention_reduction = trial.suggest_categorical('attention_reduction_ratio', [2, 4, 8, 16])
 
-        # --- Tune Dropout Rate ---
-        dropout_rate = trial.suggest_float('dropout_rate', 0.1, 0.5, step=0.1)
+
+        # --- Tune Dropout Rate for the classifier ---
+        self.classifier_dropout_rate = trial.suggest_float('classifier_dropout_rate', 0.2, 0.5, step=0.1)
 
         self.densenet = DenseNet121(
             spatial_dims=3,
             in_channels=in_channels,
-            out_channels=out_channels
+            out_channels=out_channels # This 'out_channels' defines the final classification output classes
         )
-        self.se = SEBlock(channels=1024, reduction=reduction)  # 1024 is the output from DenseNet121's final feature map
-        self.dropout = nn.Dropout(p=dropout_rate)
+        
+        # Instantiate your SeAttBlock (Attention Block)
+        # Pass the 'attention_reduction_ratio' obtained from the trial here.
+        # The 'trial' object is no longer passed into SeAttBlock if reduction is explicitly given.
+        self.attention_block = SeAttBlock(in_channels=1024, fixed_reduction_ratio=self.se_attention_reduction)
+        
+        # Now, modify the DenseNet's class_layers to insert your custom dropout
+        # MONAI's DenseNet `class_layers` is usually `nn.Sequential(AdaptiveAvgPool3d, Flatten, Linear)`.
+        # We want to insert the dropout *after* flattening and *before* the final Linear.
+        
+        # Get original pooling and classifier parts
+        original_avgpool = self.densenet.class_layers[0] # AdaptiveAvgPool3d
+        original_flatten = self.densenet.class_layers[1] # Flatten
+        original_linear = self.densenet.class_layers[2]  # Linear
+
+        # Reconstruct class_layers with the tuned dropout
+        self.densenet.class_layers = nn.Sequential(
+            original_avgpool,
+            original_flatten,
+            nn.Dropout(p=self.classifier_dropout_rate), # Apply tuned dropout
+            original_linear
+        )
 
     def forward(self, x):
-        x_features = self.densenet.features(x)
-        x_se = self.se(x_features)
-        x_dropout = self.dropout(x_se)
-        output = self.densenet.class_layers(x_dropout)
+        # 1. Pass through DenseNet's feature extraction
+        x_features = self.densenet.features(x) # Output is 5D tensor (B, 1024, D', H', W')
+        
+        # 2. Apply your custom Attention Block on the 5D feature maps
+        x_attn = self.attention_block(x_features) # Output is still 5D tensor (B, 1024, D', H', W')
+        
+        # 3. Pass through the modified DenseNet's class_layers (which now includes pooling, flattening, dropout, and final FC)
+        output = self.densenet.class_layers(x_attn)
         return output
-
 
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  OPTUNA -----------------------------------------------------------------------
