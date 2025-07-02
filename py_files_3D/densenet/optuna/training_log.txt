@@ -1,22 +1,151 @@
 
 
-==== Sampling started at 2025-06-25 00:52:53.133908 ====
+==== Sampling started at 2025-06-30 11:14:12.347067 ====
+
+
+Starting Optuna optimization for DenseNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 11:22:40.811744 ====
+
+
+Starting Optuna optimization for DenseNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 11:43:04.512005 ====
 
 
 Starting Optuna optimization for DenseNet3DWithSE...
 
 Optimization finished!
 Number of finished trials: 50
-Number of pruned trials: 35
-Number of complete trials: 15
+Number of pruned trials: 27
+Number of complete trials: 23
 
-Best trial:FrozenTrial(number=10, state=1, values=[0.6875], datetime_start=datetime.datetime(2025, 6, 25, 1, 2, 33, 280842), datetime_complete=datetime.datetime(2025, 6, 25, 1, 5, 43, 50290), params={'lr': 0.0005817376301045428, 'optimizer': 'Adam', 'batch_size': 4, 'epochs': 20, 'weight_decay': 1.2956565410409286e-06, 'gradient_clipping_norm': 5.0, 'se_reduction': 24, 'dropout_rate': 0.4}, user_attrs={}, system_attrs={}, intermediate_values={0: 0.65625, 1: 0.5, 2: 0.4375, 3: 0.5625, 4: 0.5, 5: 0.46875, 6: 0.53125, 7: 0.53125, 8: 0.375, 9: 0.46875, 10: 0.5625, 11: 0.40625, 12: 0.375, 13: 0.5625, 14: 0.34375, 15: 0.40625, 16: 0.59375, 17: 0.40625, 18: 0.375, 19: 0.6875}, distributions={'lr': FloatDistribution(high=0.01, log=True, low=1e-05, step=None), 'optimizer': CategoricalDistribution(choices=('Adam', 'RMSprop', 'SGD')), 'batch_size': CategoricalDistribution(choices=(1, 2, 4, 8)), 'epochs': IntDistribution(high=20, log=False, low=5, step=1), 'weight_decay': FloatDistribution(high=0.001, log=True, low=1e-06, step=None), 'gradient_clipping_norm': FloatDistribution(high=5.0, log=False, low=0.1, step=0.1), 'se_reduction': IntDistribution(high=32, log=False, low=8, step=4), 'dropout_rate': FloatDistribution(high=0.5, log=False, low=0.1, step=0.1)}, trial_id=10, value=None)
-    lr: 0.0005817376301045428
-    optimizer: Adam
+Best trial:FrozenTrial(number=22, state=1, values=[0.59375], datetime_start=datetime.datetime(2025, 6, 30, 12, 4, 15, 546019), datetime_complete=datetime.datetime(2025, 6, 30, 12, 6, 33, 362312), params={'lr': 0.008935381470239062, 'optimizer': 'RMSprop', 'batch_size': 4, 'epochs': 16, 'weight_decay': 4.886829930368722e-05, 'gradient_clipping_norm': 2.5000000000000004, 'attention_reduction_ratio': 8, 'classifier_dropout_rate': 0.4}, user_attrs={}, system_attrs={}, intermediate_values={0: 0.53125, 1: 0.5, 2: 0.5, 3: 0.59375, 4: 0.0, 5: 0.0, 6: 0.59375, 7: 0.5625, 8: 0.5, 9: 0.625, 10: 0.5, 11: 0.5625, 12: 0.5, 13: 0.4375, 14: 0.4375, 15: 0.59375}, distributions={'lr': FloatDistribution(high=0.01, log=True, low=1e-05, step=None), 'optimizer': CategoricalDistribution(choices=('Adam', 'RMSprop', 'SGD')), 'batch_size': CategoricalDistribution(choices=(1, 2, 4, 8)), 'epochs': IntDistribution(high=20, log=False, low=5, step=1), 'weight_decay': FloatDistribution(high=0.001, log=True, low=1e-06, step=None), 'gradient_clipping_norm': FloatDistribution(high=5.0, log=False, low=0.1, step=0.1), 'attention_reduction_ratio': CategoricalDistribution(choices=(2, 4, 8, 16)), 'classifier_dropout_rate': FloatDistribution(high=0.5, log=False, low=0.2, step=0.1)}, trial_id=22, value=None)
+    lr: 0.008935381470239062
+    optimizer: RMSprop
     batch_size: 4
-    epochs: 20
-    weight_decay: 1.2956565410409286e-06
-    gradient_clipping_norm: 5.0
-    se_reduction: 24
-    dropout_rate: 0.4
-######## Training LR Finished in 0h 38m 43s ###########
+    epochs: 16
+    weight_decay: 4.886829930368722e-05
+    gradient_clipping_norm: 2.5000000000000004
+    attention_reduction_ratio: 8
+    classifier_dropout_rate: 0.4
+######## Training LR Finished in 0h 46m 52s ###########
+
+
+==== Sampling started at 2025-06-30 12:35:48.866689 ====
+
+
+
+
+==== Sampling started at 2025-06-30 12:36:48.889484 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 12:43:19.338401 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 12:46:53.222287 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 12:55:17.907659 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 12:58:00.363681 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 17:10:23.131098 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 17:29:23.336939 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 17:46:41.560539 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 18:24:04.068327 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 18:49:39.743913 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 18:55:58.157651 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 18:59:20.659560 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 19:02:07.879311 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 19:02:55.632636 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 19:03:48.155573 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-06-30 19:10:17.828355 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+Optimization finished!
+Number of finished trials: 50
+Number of pruned trials: 28
+Number of complete trials: 22
+
+Best trial:FrozenTrial(number=8, state=1, values=[0.625], datetime_start=datetime.datetime(2025, 6, 30, 20, 13, 26, 960542), datetime_complete=datetime.datetime(2025, 6, 30, 20, 15, 17, 734020), params={'lr': 1.4959544261117525e-05, 'optimizer': 'RMSprop', 'batch_size': 4, 'epochs': 8, 'weight_decay': 0.0005492411951692184, 'gradient_clipping_norm': 1.0, 'model_name': 'efficientnet-b0', 'dropout': 0.3925264843280113}, user_attrs={}, system_attrs={}, intermediate_values={0: 0.59375, 1: 0.53125, 2: 0.46875, 3: 0.53125, 4: 0.53125, 5: 0.53125, 6: 0.5625, 7: 0.625}, distributions={'lr': FloatDistribution(high=0.01, log=True, low=1e-05, step=None), 'optimizer': CategoricalDistribution(choices=('Adam', 'RMSprop', 'SGD')), 'batch_size': CategoricalDistribution(choices=(1, 2, 4, 8)), 'epochs': IntDistribution(high=20, log=False, low=5, step=1), 'weight_decay': FloatDistribution(high=0.001, log=True, low=1e-06, step=None), 'gradient_clipping_norm': FloatDistribution(high=5.0, log=False, low=0.1, step=0.1), 'model_name': CategoricalDistribution(choices=('efficientnet-b0', 'efficientnet-b1', 'efficientnet-b2')), 'dropout': FloatDistribution(high=0.5, log=False, low=0.1, step=None)}, trial_id=8, value=None)
+    lr: 1.4959544261117525e-05
+    optimizer: RMSprop
+    batch_size: 4
+    epochs: 8
+    weight_decay: 0.0005492411951692184
+    gradient_clipping_norm: 1.0
+    model_name: efficientnet-b0
+    dropout: 0.3925264843280113
+######## Training LR Finished in 1h 51m 5s ###########
