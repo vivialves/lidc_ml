@@ -47,3 +47,90 @@ Best trial:FrozenTrial(number=4, state=1, values=[0.46875], datetime_start=datet
     gradient_clipping_norm: 0.9
     efficientnet_model_name: efficientnet-b1
     classifier_dropout_rate: 0.30000000000000004
+
+
+==== Sampling started at 2025-07-02 10:03:41.609756 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+Using device: cuda
+
+Optimization finished!
+Number of finished trials: 50
+Number of pruned trials: 39
+Number of complete trials: 11
+
+  Value (validation accuracy): 0.6562
+  Best hyperparameters:
+    lr: 3.130674513371534e-05
+    optimizer: SGD
+    batch_size: 4
+    epochs: 12
+    weight_decay: 0.00046334323037395164
+    gradient_clipping_norm: 4.0
+    model_name: efficientnet-b0
+    dropout: 0.25669680740096423
+    attention_reduction_ratio: 4
+
+==== Sampling started at 2025-07-02 10:08:07.151762 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+Optimization finished!
+Number of finished trials: 50
+Number of pruned trials: 30
+Number of complete trials: 20
+
+Best trial:FrozenTrial(number=2, state=1, values=[0.6875], datetime_start=datetime.datetime(2025, 7, 2, 10, 14, 37, 819564), datetime_complete=datetime.datetime(2025, 7, 2, 10, 20, 52, 718042), params={'lr': 0.0003376162393029044, 'optimizer': 'SGD', 'batch_size': 4, 'epochs': 19, 'weight_decay': 1.2061354917197017e-05, 'gradient_clipping_norm': 4.2, 'model_name': 'efficientnet-b2', 'dropout': 0.4259657803171173, 'attention_reduction_ratio': 4}, user_attrs={}, system_attrs={}, intermediate_values={0: 0.46875, 1: 0.5, 2: 0.40625, 3: 0.5625, 4: 0.53125, 5: 0.46875, 6: 0.53125, 7: 0.65625, 8: 0.375, 9: 0.40625, 10: 0.5625, 11: 0.5625, 12: 0.4375, 13: 0.5625, 14: 0.65625, 15: 0.5, 16: 0.40625, 17: 0.5625, 18: 0.6875}, distributions={'lr': FloatDistribution(high=0.01, log=True, low=1e-05, step=None), 'optimizer': CategoricalDistribution(choices=('Adam', 'RMSprop', 'SGD')), 'batch_size': CategoricalDistribution(choices=(1, 2, 4, 8)), 'epochs': IntDistribution(high=20, log=False, low=5, step=1), 'weight_decay': FloatDistribution(high=0.001, log=True, low=1e-06, step=None), 'gradient_clipping_norm': FloatDistribution(high=5.0, log=False, low=0.1, step=0.1), 'model_name': CategoricalDistribution(choices=('efficientnet-b0', 'efficientnet-b1', 'efficientnet-b2')), 'dropout': FloatDistribution(high=0.5, log=False, low=0.1, step=None), 'attention_reduction_ratio': CategoricalDistribution(choices=(2, 4, 8, 16))}, trial_id=2, value=None)
+    lr: 0.0003376162393029044
+    optimizer: SGD
+    batch_size: 4
+    epochs: 19
+    weight_decay: 1.2061354917197017e-05
+    gradient_clipping_norm: 4.2
+    model_name: efficientnet-b2
+    dropout: 0.4259657803171173
+    attention_reduction_ratio: 4
+######## Training LR Finished in 1h 17m 53s ###########
+
+
+==== Sampling started at 2025-07-11 21:59:55.038433 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+
+==== Sampling started at 2025-07-11 22:09:26.259544 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+Optimization finished!
+Number of finished trials: 2
+Number of pruned trials: 0
+Number of complete trials: 2
+
+Best trial:FrozenTrial(number=1, state=1, values=[0.4515625], datetime_start=datetime.datetime(2025, 7, 11, 23, 49, 14, 355620), datetime_complete=datetime.datetime(2025, 7, 12, 1, 1, 51, 798093), params={'lr': 0.00024189421156194723, 'optimizer': 'Adam', 'batch_size': 1, 'epochs': 15, 'weight_decay': 3.734236875775393e-05, 'gradient_clipping_norm': 2.1, 'model_name': 'efficientnet-b0', 'dropout': 0.36443362269414814}, user_attrs={}, system_attrs={}, intermediate_values={0: 0.509375, 1: 0.5046875, 2: 0.315625, 3: 0.5421875, 4: 0.5203125, 5: 0.4875, 6: 0.534375, 7: 0.5171875, 8: 0.5203125, 9: 0.5234375, 10: 0.4796875, 11: 0.590625, 12: 0.521875, 13: 0.521875, 14: 0.4515625}, distributions={'lr': FloatDistribution(high=0.01, log=True, low=1e-05, step=None), 'optimizer': CategoricalDistribution(choices=('Adam', 'RMSprop', 'SGD')), 'batch_size': CategoricalDistribution(choices=(1, 2, 4, 8)), 'epochs': IntDistribution(high=20, log=False, low=5, step=1), 'weight_decay': FloatDistribution(high=0.001, log=True, low=1e-06, step=None), 'gradient_clipping_norm': FloatDistribution(high=5.0, log=False, low=0.1, step=0.1), 'model_name': CategoricalDistribution(choices=('efficientnet-b0', 'efficientnet-b1', 'efficientnet-b2')), 'dropout': FloatDistribution(high=0.5, log=False, low=0.1, step=None)}, trial_id=1, value=None)
+    lr: 0.00024189421156194723
+    optimizer: Adam
+    batch_size: 1
+    epochs: 15
+    weight_decay: 3.734236875775393e-05
+    gradient_clipping_norm: 2.1
+    model_name: efficientnet-b0
+    dropout: 0.36443362269414814
+######## Training LR Finished in 2h 52m 44s ###########
+
+
+
+
+
+
+
+
+
+
+
