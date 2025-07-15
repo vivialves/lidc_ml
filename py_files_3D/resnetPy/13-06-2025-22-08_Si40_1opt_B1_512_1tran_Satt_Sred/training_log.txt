@@ -1,0 +1,118 @@
+
+
+==== Training started at 2025-06-13 22:08:00.382759 ====
+
+Using Gradient Accumulation with 4 steps.
+DataLoader batch size: 1
+Effective batch size: 4
+
+Epoch 1/50
+Train Loss: 0.5765 | Train Acc: 69.01%
+Val Loss: 0.8710 | Val Acc: 46.02%
+Precision: 0.4227 | Recall: 0.4515 | F1 Score: 0.3988
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 1: 93
+Label distribution in training epoch: Counter({0: 1867, 1: 1853})
+
+Validation loss improved. Saving best model to /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_resnet_pytorch3D_architecture.pth
+
+Epoch 2/50
+Train Loss: 0.1502 | Train Acc: 94.78%
+Val Loss: 1.2136 | Val Acc: 46.95%
+Precision: 0.2348 | Recall: 0.5000 | F1 Score: 0.3195
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 2: 93
+Label distribution in training epoch: Counter({0: 1912, 1: 1808})
+
+Validation loss did not improve. Patience: 1/5
+
+Epoch 3/50
+Train Loss: 0.0009 | Train Acc: 100.00%
+Val Loss: 1.3286 | Val Acc: 50.31%
+Precision: 0.2516 | Recall: 0.5000 | F1 Score: 0.3347
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 3: 93
+Label distribution in training epoch: Counter({1: 1864, 0: 1856})
+
+Validation loss did not improve. Patience: 2/5
+
+Epoch 4/50
+Train Loss: 0.0002 | Train Acc: 100.00%
+Val Loss: 0.8890 | Val Acc: 52.11%
+Precision: 0.2605 | Recall: 0.5000 | F1 Score: 0.3426
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 4: 93
+Label distribution in training epoch: Counter({0: 1908, 1: 1812})
+
+Validation loss did not improve. Patience: 3/5
+
+Epoch 5/50
+Train Loss: 0.0001 | Train Acc: 100.00%
+Val Loss: 0.7544 | Val Acc: 36.25%
+Precision: 0.3593 | Recall: 0.3610 | F1 Score: 0.3595
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 5: 93
+Label distribution in training epoch: Counter({1: 1920, 0: 1800})
+
+Validation loss improved. Saving best model to /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_resnet_pytorch3D_architecture.pth
+
+Epoch 6/50
+Train Loss: 0.0095 | Train Acc: 99.60%
+Val Loss: 19.3381 | Val Acc: 51.64%
+Precision: 0.2582 | Recall: 0.5000 | F1 Score: 0.3405
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 6: 93
+Label distribution in training epoch: Counter({1: 1888, 0: 1832})
+
+Validation loss did not improve. Patience: 1/5
+
+Epoch 7/50
+Train Loss: 0.2837 | Train Acc: 86.99%
+Val Loss: 1.4561 | Val Acc: 54.38%
+Precision: 0.7647 | Recall: 0.5313 | F1 Score: 0.4051
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 7: 93
+Label distribution in training epoch: Counter({0: 1890, 1: 1830})
+
+Validation loss did not improve. Patience: 2/5
+
+Epoch 8/50
+Train Loss: 0.0013 | Train Acc: 100.00%
+Val Loss: 1.1420 | Val Acc: 45.47%
+Precision: 0.4496 | Recall: 0.4524 | F1 Score: 0.4456
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 8: 93
+Label distribution in training epoch: Counter({0: 1911, 1: 1809})
+
+Validation loss did not improve. Patience: 3/5
+
+Epoch 9/50
+Train Loss: 0.0002 | Train Acc: 100.00%
+Val Loss: 0.8513 | Val Acc: 43.28%
+Precision: 0.4264 | Recall: 0.4294 | F1 Score: 0.4247
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 9: 93
+Label distribution in training epoch: Counter({0: 1911, 1: 1809})
+
+Validation loss did not improve. Patience: 4/5
+
+Epoch 10/50
+Train Loss: 0.0001 | Train Acc: 100.00%
+Val Loss: 1.3076 | Val Acc: 54.22%
+Precision: 0.6409 | Recall: 0.5521 | F1 Score: 0.4628
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 10: 93
+Label distribution in training epoch: Counter({0: 1949, 1: 1771})
+
+Validation loss did not improve. Patience: 5/5
+
+Early stopping triggered after 10 epochs.
+
+
+Training complete.
+Loading best model from /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_resnet_pytorch3D_architecture.pth for final metrics.
+######## Training Finished in 5h 48m 15s ###########
+Test Accuracy on 1280 images: 68.83%
+AUC: 0.3775
+Class 0-non-cancer: Precision: 0.42, Recall: 0.46, F1-Score: 0.44
+Class 1-cancer: Precision: 0.37, Recall: 0.32, F1-Score: 0.34

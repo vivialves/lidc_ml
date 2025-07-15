@@ -26,7 +26,10 @@ from monai.transforms import (Compose,
                               RandBiasField, 
                               RandFlip, 
                               RandAffine, 
-                              RandRotate, 
+                              RandRotate,
+                              RandShiftIntensity,
+                              ResizeWithPadOrCrop,
+                              RandGaussianNoise,
                               RandZoom)
 from torchinfo import summary
 from torch.amp import autocast, GradScaler
@@ -35,7 +38,7 @@ from collections import Counter
 from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
 from torchmetrics.classification import MulticlassConfusionMatrix, MulticlassPrecision, MulticlassRecall, MulticlassF1Score
 from sklearn.metrics import ConfusionMatrixDisplay, roc_auc_score, roc_curve
-
+from sklearn.decomposition import PCA
 
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  GPU Information --------------------------------------------------------------------
@@ -55,23 +58,23 @@ else:
 #---------------------------------------------------------------------------------------------------------------------------------------
 
 IMAGE_SIZE = (256, 256, 256)
-BATCH_SIZE = 1
+BATCH_SIZE = 8
 NUM_CHANNELS = 1
 DEPTH = 128
 NUM_CLASSES = 2
-PATIENCE_COUNTER = 6
+PATIENCE_COUNTER = 20
 EPOCHS = 50
 SEED = 42
 VAL_RATIO = 0.2
 TEST_RATIO = 0.2
 
-PATH_TRAIN = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/train'
-PATH_TEST = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/test'
-PATH_VAL = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/val'
+PATH_TRAIN = '/dev/shm/lidc/npy_3D_splitted/train'
+PATH_TEST = '/home/etudiant/Projets/Viviane/LIDC-ML/data/npy_3D_splitted/test'
+PATH_VAL = '/home/etudiant/Projets/Viviane/LIDC-ML/data/npy_3D_splitted/val'
 
-CSV_TRAIN = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/train_index.csv'
-CSV_TEST = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/test_index.csv'
-CSV_VAL = '/media/etudiant/DATA2/LungCancerDatasets/LIDC-IDRI/lidc-ml/npy_3D_splitted/val_index.csv'
+CSV_TRAIN = '/dev/shm/lidc/npy_3D_splitted/train_index.csv'
+CSV_TEST = '/home/etudiant/Projets/Viviane/LIDC-ML/data/npy_3D_splitted/test_index.csv'
+CSV_VAL = '/home/etudiant/Projets/Viviane/LIDC-ML/data/npy_3D_splitted/val_index.csv'
 
 PATH_MODEL = '/home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_efficientnet_pytorch3D_architecture.pth'
 
@@ -83,19 +86,19 @@ INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
 
 IMAGE_SIZE_SUMMARY = 256
 
-NUM_AUG_PER_SAMPLE = 150
+NUM_AUG_PER_SAMPLE = 80
 
 LOG_FILE = "training_log.txt"
 
 best_params_from_optuna = {
-    'lr': 0.004488938960536183,
-    'optimizer': 'SGD',
-    'batch_size': 4,
-    'epochs': 17,
-    'weight_decay': 0.0004891541623370612,
-    'gradient_clipping_norm': 2.3000000000000003,
-    'efficientnet_model_name': 'efficientnet-b1',
-    'classifier_dropout_rate': 0.5
+    'lr': 0.00024189421156194723,
+    'optimizer': 'Adam',
+    'batch_size': 1,
+    'epochs': 15,
+    'weight_decay': 3.734236875775393e-05,
+    'gradient_clipping_norm': 2.1,
+    'model_name': 'efficientnet-b0',
+    'dropout': 0.36443362269414814,
  }
 
 #---------------------------------------------------------------------------------------------------------------------------------------
@@ -283,22 +286,43 @@ class EfficientNet3DClassifier(nn.Module):
 
     def forward(self, x):
         return self.model(x)
+    
+    def forward_features(self, x, classifier_dropout_rate):
+        # This mimics what MONAI does internally
+        x = self.model._conv_stem(x)
+        x = self.model._bn0(x)
+        x = self.model._swish(x)
+
+        for block in self.model._blocks:
+            x = block(x)
+            x = F.dropout3d(x, p=classifier_dropout_rate, training=self.training)
+
+        # Apply final convolution + pooling
+        x = self.model._conv_head(x)
+        x = F.dropout3d(x, p=0.1, training=self.training)
+        x = self.model._bn1(x)
+        x = self.model._swish(x)
+        x = F.dropout3d(x, p=classifier_dropout_rate, training=self.training)
+        x = F.adaptive_avg_pool3d(x, 1)
+        x = torch.flatten(x, 1)  # (B, C)
+
+        return x
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model = EfficientNet3DClassifier(model_name=best_params_from_optuna['efficientnet_model_name'],
+model = EfficientNet3DClassifier(model_name=best_params_from_optuna['model_name'],
                                  in_channels=1,
                                  num_classes=NUM_CLASSES,
-                                 classifier_dropout_rate=best_params_from_optuna['classifier_dropout_rate']
+                                 classifier_dropout_rate=best_params_from_optuna['dropout']
 ) # Binary classification
 model = model.to(device)  # If using GPU
 
 criterion = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), 
+optimizer = torch.optim.Adam(model.parameters(), 
                             lr = best_params_from_optuna['lr'], 
                             weight_decay=best_params_from_optuna['weight_decay'])
 
-summary(model, input_size=(BATCH_SIZE, NUM_CHANNELS, DEPTH, IMAGE_SIZE_SUMMARY, IMAGE_SIZE_SUMMARY))
+# summary(model, input_size=(BATCH_SIZE, NUM_CHANNELS, DEPTH, IMAGE_SIZE_SUMMARY, IMAGE_SIZE_SUMMARY))
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------
@@ -605,6 +629,43 @@ log_message(summary_)
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  Evaluating ---------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
+#####################################################  PCA #################################################################################
+
+features = []
+labels = []
+
+model.eval()
+with torch.no_grad():
+    for batch in val_loader:
+        inputs, targets = batch[0].to(device), batch[1].to(device)
+        outputs = model.forward_features(inputs, classifier_dropout_rate=best_params_from_optuna['dropout'])  # before final FC
+        features.append(outputs.cpu().numpy())
+        labels.append(targets.cpu().numpy())
+
+# Stack everything
+features = np.concatenate(features)
+labels = np.concatenate(labels)
+
+# Reduce to 2D using PCA
+pca = PCA(n_components=2)
+reduced = pca.fit_transform(features)
+
+# Plot
+plt.figure(figsize=(8, 6))
+for label in np.unique(labels):
+    idxs = labels == label
+    plt.scatter(reduced[idxs, 0], reduced[idxs, 1], label=f"Class {label}", alpha=0.6)
+
+plt.legend()
+plt.title("PCA of Last Layer Features")
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+plt.grid(True)
+plt.tight_layout()
+filepath = os.path.join(PATH_RESULTS, f"pca_last_layer.png")
+plt.savefig(filepath)
+plt.show()
+
 
 #####################################################  Accuracy ###################################################################
 
@@ -750,10 +811,10 @@ for i, name in enumerate(classes):
 try:
     # 2. Instantiate your model class
     # Pass the SAME in_channels and out_channels that you used during training.
-    model = EfficientNet3DClassifier(model_name=best_params_from_optuna['efficientnet_model_name'],
+    model = EfficientNet3DClassifier(model_name=best_params_from_optuna['model_name'],
                                     in_channels=1,
                                     num_classes=NUM_CHANNELS,
-                                    classifier_dropout_rate=best_params_from_optuna['classifier_dropout_rate'])
+                                    classifier_dropout_rate=best_params_from_optuna['dropout'])
     print(f"Instantiated EfficientNet3D-Pytorch")
 
     # 3. Load the state_dict

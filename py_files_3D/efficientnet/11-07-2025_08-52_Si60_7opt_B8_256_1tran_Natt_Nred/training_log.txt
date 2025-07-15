@@ -1,0 +1,181 @@
+
+
+==== Training started at 2025-07-11 08:52:47.514512 ====
+
+Using Gradient Accumulation with 4 steps.
+DataLoader batch size: 8
+Effective batch size: 32
+
+Epoch 1/50
+Train Loss: 0.6891 | Train Acc: 55.18%
+Val Loss: 0.6937 | Val Acc: 50.47%
+Precision: 0.2523 | Recall: 0.5000 | F1 Score: 0.3354
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 1: 93
+Label distribution in training epoch: Counter({1: 2867, 0: 2713})
+
+Validation loss improved. Saving best model to /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_efficientnet_pytorch3D_architecture_.pth
+
+Epoch 2/50
+Train Loss: 0.4517 | Train Acc: 79.96%
+Val Loss: 1.2164 | Val Acc: 43.91%
+Precision: 0.2318 | Recall: 0.4460 | F1 Score: 0.3051
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 2: 93
+Label distribution in training epoch: Counter({0: 2810, 1: 2770})
+
+Validation loss did not improve. Patience: 1/15
+
+Epoch 3/50
+Train Loss: 0.2215 | Train Acc: 93.21%
+Val Loss: 1.1159 | Val Acc: 52.29%
+Precision: 0.5218 | Recall: 0.5212 | F1 Score: 0.5188
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 3: 93
+Label distribution in training epoch: Counter({1: 2810, 0: 2770})
+
+Validation loss did not improve. Patience: 2/15
+
+Epoch 4/50
+Train Loss: 0.1463 | Train Acc: 95.47%
+Val Loss: 1.4068 | Val Acc: 54.95%
+Precision: 0.5510 | Recall: 0.5501 | F1 Score: 0.5476
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 4: 93
+Label distribution in training epoch: Counter({1: 2799, 0: 2781})
+
+Validation loss did not improve. Patience: 3/15
+
+Epoch 5/50
+Train Loss: 0.1100 | Train Acc: 96.81%
+Val Loss: 1.4643 | Val Acc: 54.32%
+Precision: 0.5431 | Recall: 0.5431 | F1 Score: 0.5431
+Current AMP scale: 8192.0
+Unique augmented volumes seen in epoch 5: 93
+Label distribution in training epoch: Counter({1: 2792, 0: 2788})
+
+Validation loss did not improve. Patience: 4/15
+
+Epoch 6/50
+Train Loss: 0.0739 | Train Acc: 97.90%
+Val Loss: 1.7149 | Val Acc: 52.71%
+Precision: 0.5274 | Recall: 0.5274 | F1 Score: 0.5269
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 6: 93
+Label distribution in training epoch: Counter({1: 2812, 0: 2768})
+
+Validation loss did not improve. Patience: 5/15
+
+Epoch 7/50
+Train Loss: 0.0673 | Train Acc: 98.17%
+Val Loss: 1.7571 | Val Acc: 49.06%
+Precision: 0.4907 | Recall: 0.4908 | F1 Score: 0.4894
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 7: 93
+Label distribution in training epoch: Counter({0: 2796, 1: 2784})
+
+Validation loss did not improve. Patience: 6/15
+
+Epoch 8/50
+Train Loss: 0.0530 | Train Acc: 98.58%
+Val Loss: 2.0419 | Val Acc: 50.78%
+Precision: 0.5128 | Recall: 0.5107 | F1 Score: 0.4889
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 8: 93
+Label distribution in training epoch: Counter({0: 2804, 1: 2776})
+
+Validation loss did not improve. Patience: 7/15
+
+Epoch 9/50
+Train Loss: 0.0395 | Train Acc: 98.80%
+Val Loss: 2.2626 | Val Acc: 49.84%
+Precision: 0.5009 | Recall: 0.5009 | F1 Score: 0.4969
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 9: 93
+Label distribution in training epoch: Counter({0: 2806, 1: 2774})
+
+Validation loss did not improve. Patience: 8/15
+
+Epoch 10/50
+Train Loss: 0.0365 | Train Acc: 99.21%
+Val Loss: 2.3113 | Val Acc: 53.75%
+Precision: 0.5453 | Recall: 0.5401 | F1 Score: 0.5253
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 10: 93
+Label distribution in training epoch: Counter({1: 2795, 0: 2785})
+
+Validation loss did not improve. Patience: 9/15
+
+Epoch 11/50
+Train Loss: 0.0351 | Train Acc: 99.03%
+Val Loss: 2.2178 | Val Acc: 41.41%
+Precision: 0.4142 | Recall: 0.4141 | F1 Score: 0.4139
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 11: 93
+Label distribution in training epoch: Counter({1: 2830, 0: 2750})
+
+Validation loss did not improve. Patience: 10/15
+
+Epoch 12/50
+Train Loss: 0.0416 | Train Acc: 99.05%
+Val Loss: 2.3873 | Val Acc: 49.27%
+Precision: 0.4889 | Recall: 0.4904 | F1 Score: 0.4734
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 12: 93
+Label distribution in training epoch: Counter({1: 2820, 0: 2760})
+
+Validation loss did not improve. Patience: 11/15
+
+Epoch 13/50
+Train Loss: 0.0209 | Train Acc: 99.48%
+Val Loss: 2.3865 | Val Acc: 51.82%
+Precision: 0.5234 | Recall: 0.5230 | F1 Score: 0.5172
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 13: 93
+Label distribution in training epoch: Counter({1: 2794, 0: 2786})
+
+Validation loss did not improve. Patience: 12/15
+
+Epoch 14/50
+Train Loss: 0.0310 | Train Acc: 99.07%
+Val Loss: 2.0565 | Val Acc: 49.84%
+Precision: 0.4965 | Recall: 0.4967 | F1 Score: 0.4894
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 14: 93
+Label distribution in training epoch: Counter({0: 2856, 1: 2724})
+
+Validation loss did not improve. Patience: 13/15
+
+Epoch 15/50
+Train Loss: 0.0319 | Train Acc: 99.25%
+Val Loss: 2.1607 | Val Acc: 48.65%
+Precision: 0.4878 | Recall: 0.4879 | F1 Score: 0.4858
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 15: 93
+Label distribution in training epoch: Counter({0: 2799, 1: 2781})
+
+Validation loss did not improve. Patience: 14/15
+
+Epoch 16/50
+Train Loss: 0.0159 | Train Acc: 99.46%
+Val Loss: 2.2492 | Val Acc: 51.35%
+Precision: 0.5196 | Recall: 0.5181 | F1 Score: 0.5060
+Current AMP scale: 4096.0
+Unique augmented volumes seen in epoch 16: 93
+Label distribution in training epoch: Counter({0: 2802, 1: 2778})
+
+Validation loss did not improve. Patience: 15/15
+
+Early stopping triggered after 16 epochs.
+
+
+Training complete.
+Loading best model from /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_efficientnet_pytorch3D_architecture_.pth for final metrics.
+######## Training Finished in 7h 24m 24s ###########
+Test Accuracy on 1920 images: 50.36%
+AUC: 0.4211
+Class 0-non-cancer: Precision: 0.54, Recall: 1.00, F1-Score: 0.70
+Class 1-cancer: Precision: 0.00, Recall: 0.00, F1-Score: 0.00
+
+array([[374,  617],
+       [317,  612]])
