@@ -27,3 +27,42 @@ Best trial:FrozenTrial(number=0, state=1, values=[0.5625], datetime_start=dateti
     fc_dropout_rate: 0.4
     layer4_dropout_rate: 0.5
 ######## Training LR Finished in 0h 43m 2s ###########
+
+==== Sampling started at 2025-07-14 11:07:23.745755 ====
+
+Starting Optuna optimization for ResnetEnhaced...
+
+Optimization finished!
+Number of finished trials: 2
+Number of pruned trials: 0
+Number of complete trials: 2
+
+Best trial:FrozenTrial(number=1, state=1, values=[0.496875], datetime_start=datetime.datetime(2025, 7, 14, 12, 46, 5, 211219), datetime_complete=datetime.datetime(2025, 7, 14, 13, 22, 32, 755256), params={'lr': 0.004162892688344911, 'optimizer': 'RMSprop', 'batch_size': 2, 'epochs': 6, 'weight_decay': 0.00025496622224094177, 'gradient_clipping_norm': 4.3, 'dropout': 0.21467574520590027, 'attention_reduction_ratio': 16}, user_attrs={}, system_attrs={}, intermediate_values={0: 0.4921875, 1: 0.496875, 2: 0.5078125, 3: 0.5125, 4: 0.5125, 5: 0.496875}, distributions={'lr': FloatDistribution(high=0.01, log=True, low=1e-05, step=None), 'optimizer': CategoricalDistribution(choices=('Adam', 'RMSprop', 'SGD')), 'batch_size': CategoricalDistribution(choices=(1, 2, 4, 8)), 'epochs': IntDistribution(high=20, log=False, low=5, step=1), 'weight_decay': FloatDistribution(high=0.001, log=True, low=1e-06, step=None), 'gradient_clipping_norm': FloatDistribution(high=5.0, log=False, low=0.1, step=0.1), 'dropout': FloatDistribution(high=0.5, log=False, low=0.1, step=None), 'attention_reduction_ratio': CategoricalDistribution(choices=(2, 4, 8, 16))}, trial_id=1, value=None)
+    lr: 0.004162892688344911
+    optimizer: RMSprop
+    batch_size: 2
+    epochs: 6
+    weight_decay: 0.00025496622224094177
+    gradient_clipping_norm: 4.3
+    dropout: 0.21467574520590027
+    attention_reduction_ratio: 16
+######## Training LR Finished in 2h 15m 28s ###########
+
+==== Sampling started at 2025-07-14 16:29:30.593771 ====
+
+Optimization finished!
+Number of finished trials: 2
+Number of pruned trials: 0
+Number of complete trials: 2
+
+Best trial:FrozenTrial(number=0, state=1, values=[0.515625], datetime_start=datetime.datetime(2025, 7, 14, 16, 33, 34, 281945), datetime_complete=datetime.datetime(2025, 7, 14, 17, 59, 36, 178010), params={'lr': 0.0019351699184313679, 'optimizer': 'RMSprop', 'batch_size': 1, 'epochs': 9, 'weight_decay': 0.00026275296572399296, 'gradient_clipping_norm': 2.3000000000000003, 'dropout': 0.1461772607453824, 'attention_reduction_ratio': 4}, user_attrs={}, system_attrs={}, intermediate_values={0: 0.5203125, 1: 0.525, 2: 0.4828125, 3: 0.5015625, 4: 0.4890625, 5: 0.5140625, 6: 0.496875, 7: 0.478125, 8: 0.515625}, distributions={'lr': FloatDistribution(high=0.01, log=True, low=1e-05, step=None), 'optimizer': CategoricalDistribution(choices=('Adam', 'RMSprop', 'SGD')), 'batch_size': CategoricalDistribution(choices=(1, 2, 4, 8)), 'epochs': IntDistribution(high=20, log=False, low=5, step=1), 'weight_decay': FloatDistribution(high=0.001, log=True, low=1e-06, step=None), 'gradient_clipping_norm': FloatDistribution(high=5.0, log=False, low=0.1, step=0.1), 'dropout': FloatDistribution(high=0.5, log=False, low=0.1, step=None), 'attention_reduction_ratio': CategoricalDistribution(choices=(2, 4, 8, 16))}, trial_id=0, value=None)
+  Value (validation accuracy): 0.5156
+  Best hyperparameters:
+    lr: 0.0019351699184313679
+    optimizer: RMSprop
+    batch_size: 1
+    epochs: 9
+    weight_decay: 0.00026275296572399296
+    gradient_clipping_norm: 2.3000000000000003
+    dropout: 0.1461772607453824
+    attention_reduction_ratio: 4

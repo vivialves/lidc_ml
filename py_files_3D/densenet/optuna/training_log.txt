@@ -149,3 +149,24 @@ Best trial:FrozenTrial(number=8, state=1, values=[0.625], datetime_start=datetim
     model_name: efficientnet-b0
     dropout: 0.3925264843280113
 ######## Training LR Finished in 1h 51m 5s ###########
+
+==== Sampling started at 2025-07-13 11:34:11.222748 ====
+
+
+Starting Optuna optimization for EfficientNet3DWithSE...
+
+Optimization finished!
+Number of finished trials: 1
+Number of pruned trials: 0
+Number of complete trials: 1
+
+Best trial:FrozenTrial(number=0, state=1, values=[0.521875], datetime_start=datetime.datetime(2025, 7, 13, 11, 38, 12, 791550), datetime_complete=datetime.datetime(2025, 7, 13, 13, 45, 42, 234716), params={'lr': 0.00013691734153244823, 'optimizer': 'SGD', 'batch_size': 2, 'epochs': 17, 'weight_decay': 4.108822099950708e-06, 'gradient_clipping_norm': 3.2, 'dropout': 0.3771512050512449, 'attention_reduction_ratio': 8}, user_attrs={}, system_attrs={}, intermediate_values={0: 0.0, 1: 0.0, 2: 0.0, 3: 0.09375, 4: 0.1265625, 5: 0.1765625, 6: 0.3734375, 7: 0.5328125, 8: 0.5953125, 9: 0.5640625, 10: 0.4828125, 11: 0.53125, 12: 0.4890625, 13: 0.5125, 14: 0.5203125, 15: 0.4921875, 16: 0.521875}, distributions={'lr': FloatDistribution(high=0.01, log=True, low=1e-05, step=None), 'optimizer': CategoricalDistribution(choices=('Adam', 'RMSprop', 'SGD')), 'batch_size': CategoricalDistribution(choices=(1, 2, 4, 8)), 'epochs': IntDistribution(high=20, log=False, low=5, step=1), 'weight_decay': FloatDistribution(high=0.001, log=True, low=1e-06, step=None), 'gradient_clipping_norm': FloatDistribution(high=5.0, log=False, low=0.1, step=0.1), 'dropout': FloatDistribution(high=0.5, log=False, low=0.1, step=None), 'attention_reduction_ratio': CategoricalDistribution(choices=(2, 4, 8, 16))}, trial_id=0, value=None)
+    lr: 0.00013691734153244823
+    optimizer: SGD
+    batch_size: 2
+    epochs: 17
+    weight_decay: 4.108822099950708e-06
+    gradient_clipping_norm: 3.2
+    dropout: 0.3771512050512449
+    attention_reduction_ratio: 8
+######## Training LR Finished in 2h 11m 43s ###########
