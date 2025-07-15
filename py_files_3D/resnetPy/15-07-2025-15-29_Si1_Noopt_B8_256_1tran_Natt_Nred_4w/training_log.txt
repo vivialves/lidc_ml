@@ -536,3 +536,233 @@ Label distribution in training epoch: Counter({1: 50, 0: 43})
 
 Validation loss did not improve. Patience: 28/50
 
+Epoch 54/100
+Train Loss: 0.0284 | Train Acc: 97.85%
+Val Loss: 2.0456 | Val Acc: 59.38%
+Precision: 0.5917 | Recall: 0.5863 | F1 Score: 0.5836
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 54: 61
+Label distribution in training epoch: Counter({1: 48, 0: 45})
+
+Validation loss did not improve. Patience: 29/50
+
+Epoch 55/100
+Train Loss: 0.3528 | Train Acc: 90.32%
+Val Loss: 2.2900 | Val Acc: 59.38%
+Precision: 0.5583 | Recall: 0.5606 | F1 Score: 0.5589
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 55: 55
+Label distribution in training epoch: Counter({0: 54, 1: 39})
+
+Validation loss did not improve. Patience: 30/50
+
+Epoch 56/100
+Train Loss: 0.0334 | Train Acc: 97.85%
+Val Loss: 2.6596 | Val Acc: 68.75%
+Precision: 0.7486 | Recall: 0.6706 | F1 Score: 0.6537
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 56: 56
+Label distribution in training epoch: Counter({1: 50, 0: 43})
+
+Validation loss did not improve. Patience: 31/50
+
+Epoch 57/100
+Train Loss: 0.0298 | Train Acc: 98.92%
+Val Loss: 1.8944 | Val Acc: 75.00%
+Precision: 0.7636 | Recall: 0.7302 | F1 Score: 0.7333
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 57: 60
+Label distribution in training epoch: Counter({0: 56, 1: 37})
+
+Validation loss did not improve. Patience: 32/50
+
+Epoch 58/100
+Train Loss: 0.0069 | Train Acc: 100.00%
+Val Loss: 1.5342 | Val Acc: 71.88%
+Precision: 0.7235 | Recall: 0.7262 | F1 Score: 0.7185
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 58: 56
+Label distribution in training epoch: Counter({0: 51, 1: 42})
+
+Validation loss did not improve. Patience: 33/50
+
+Epoch 59/100
+Train Loss: 0.1734 | Train Acc: 95.70%
+Val Loss: 2.8061 | Val Acc: 59.38%
+Precision: 0.5980 | Recall: 0.5992 | F1 Score: 0.5934
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 59: 62
+Label distribution in training epoch: Counter({0: 49, 1: 44})
+
+Validation loss did not improve. Patience: 34/50
+
+Epoch 60/100
+Train Loss: 0.0048 | Train Acc: 100.00%
+Val Loss: 2.2651 | Val Acc: 56.25%
+Precision: 0.5647 | Recall: 0.5647 | F1 Score: 0.5625
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 60: 54
+Label distribution in training epoch: Counter({0: 50, 1: 43})
+
+Validation loss did not improve. Patience: 35/50
+
+Epoch 61/100
+Train Loss: 0.0065 | Train Acc: 100.00%
+Val Loss: 2.2702 | Val Acc: 43.75%
+Precision: 0.4365 | Recall: 0.4375 | F1 Score: 0.4353
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 61: 60
+Label distribution in training epoch: Counter({0: 53, 1: 40})
+
+Validation loss did not improve. Patience: 36/50
+
+Epoch 62/100
+Train Loss: 0.0547 | Train Acc: 96.77%
+Val Loss: 2.4388 | Val Acc: 43.75%
+Precision: 0.4343 | Recall: 0.4549 | F1 Score: 0.4000
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 62: 55
+Label distribution in training epoch: Counter({0: 48, 1: 45})
+
+Validation loss did not improve. Patience: 37/50
+
+Epoch 63/100
+Train Loss: 0.0068 | Train Acc: 100.00%
+Val Loss: 2.4902 | Val Acc: 59.38%
+Precision: 0.5675 | Recall: 0.5821 | F1 Score: 0.5589
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 63: 59
+Label distribution in training epoch: Counter({0: 49, 1: 44})
+
+Validation loss did not improve. Patience: 38/50
+
+Epoch 64/100
+Train Loss: 0.0027 | Train Acc: 100.00%
+Val Loss: 2.9135 | Val Acc: 56.25%
+Precision: 0.5500 | Recall: 0.5476 | F1 Score: 0.5466
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 64: 64
+Label distribution in training epoch: Counter({1: 50, 0: 43})
+
+Validation loss did not improve. Patience: 39/50
+
+Epoch 65/100
+Train Loss: 0.0014 | Train Acc: 100.00%
+Val Loss: 3.6933 | Val Acc: 46.88%
+Precision: 0.4654 | Recall: 0.4688 | F1 Score: 0.4555
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 65: 55
+Label distribution in training epoch: Counter({1: 48, 0: 45})
+
+Validation loss did not improve. Patience: 40/50
+
+Epoch 66/100
+Train Loss: 0.0179 | Train Acc: 100.00%
+Val Loss: 1.3024 | Val Acc: 62.50%
+Precision: 0.6250 | Recall: 0.6270 | F1 Score: 0.6235
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 66: 60
+Label distribution in training epoch: Counter({0: 48, 1: 45})
+
+Validation loss did not improve. Patience: 41/50
+
+Epoch 67/100
+Train Loss: 0.0057 | Train Acc: 100.00%
+Val Loss: 1.4577 | Val Acc: 62.50%
+Precision: 0.6494 | Recall: 0.6353 | F1 Score: 0.6190
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 67: 57
+Label distribution in training epoch: Counter({0: 50, 1: 43})
+
+Validation loss did not improve. Patience: 42/50
+
+Epoch 68/100
+Train Loss: 0.0032 | Train Acc: 100.00%
+Val Loss: 1.3410 | Val Acc: 59.38%
+Precision: 0.5409 | Recall: 0.5390 | F1 Score: 0.5393
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 68: 59
+Label distribution in training epoch: Counter({1: 53, 0: 40})
+
+Validation loss did not improve. Patience: 43/50
+
+Epoch 69/100
+Train Loss: 0.0028 | Train Acc: 100.00%
+Val Loss: 2.3413 | Val Acc: 65.62%
+Precision: 0.6608 | Recall: 0.6627 | F1 Score: 0.6559
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 69: 54
+Label distribution in training epoch: Counter({1: 49, 0: 44})
+
+Validation loss did not improve. Patience: 44/50
+
+Epoch 70/100
+Train Loss: 0.1316 | Train Acc: 96.77%
+Val Loss: 2.7388 | Val Acc: 46.88%
+Precision: 0.4643 | Recall: 0.4647 | F1 Score: 0.4640
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 70: 61
+Label distribution in training epoch: Counter({1: 48, 0: 45})
+
+Validation loss did not improve. Patience: 45/50
+
+Epoch 71/100
+Train Loss: 0.1983 | Train Acc: 94.62%
+Val Loss: 1.8149 | Val Acc: 65.62%
+Precision: 0.6619 | Recall: 0.6562 | F1 Score: 0.6532
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 71: 59
+Label distribution in training epoch: Counter({1: 50, 0: 43})
+
+Validation loss did not improve. Patience: 46/50
+
+Epoch 72/100
+Train Loss: 0.1830 | Train Acc: 95.70%
+Val Loss: 1.3812 | Val Acc: 59.38%
+Precision: 0.6371 | Recall: 0.5938 | F1 Score: 0.5589
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 72: 57
+Label distribution in training epoch: Counter({0: 47, 1: 46})
+
+Validation loss did not improve. Patience: 47/50
+
+Epoch 73/100
+Train Loss: 0.0058 | Train Acc: 100.00%
+Val Loss: 3.3717 | Val Acc: 46.88%
+Precision: 0.4643 | Recall: 0.4647 | F1 Score: 0.4640
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 73: 62
+Label distribution in training epoch: Counter({1: 48, 0: 45})
+
+Validation loss did not improve. Patience: 48/50
+
+Epoch 74/100
+Train Loss: 0.0782 | Train Acc: 97.85%
+Val Loss: 3.4742 | Val Acc: 43.75%
+Precision: 0.4583 | Recall: 0.4683 | F1 Score: 0.4170
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 74: 58
+Label distribution in training epoch: Counter({1: 55, 0: 38})
+
+Validation loss did not improve. Patience: 49/50
+
+Epoch 75/100
+Train Loss: 0.0803 | Train Acc: 96.77%
+Val Loss: 4.0492 | Val Acc: 53.12%
+Precision: 0.5157 | Recall: 0.5208 | F1 Score: 0.4910
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 75: 54
+Label distribution in training epoch: Counter({1: 55, 0: 38})
+
+Validation loss did not improve. Patience: 50/50
+
+Early stopping triggered after 75 epochs.
+
+
+Training complete.
+Loading best model from /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_resnet_pytorch3D_architecture_v0.pth for final metrics.
+######## Training Finished in 0h 31m 36s ###########
+Test Accuracy on 32 images: 62.50%
+AUC: 0.4170
+Class 0-non-cancer: Precision: 0.50, Recall: 0.44, F1-Score: 0.47
+Class 1-cancer: Precision: 0.38, Recall: 0.43, F1-Score: 0.40
