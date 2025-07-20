@@ -70,7 +70,7 @@ CSV_TRAIN = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/train_index
 CSV_TEST = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/test_index.csv'
 CSV_VAL = '/home/vivianea/projects/BrainInnov/data/npy_3D_splitted/val_index.csv'
 
-SAVE_DIR = "/home/vivianea/projects/BrainInnov/py_files_3D/densenet/optuna"
+SAVE_DIR = "/home/vivianea/projects/BrainInnov/py_files_3D/efficient/optuna"
 CLASS_MAP = {'cancer': 0, 'non-cancer': 1}
 INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
 

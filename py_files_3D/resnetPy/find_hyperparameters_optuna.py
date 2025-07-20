@@ -5,6 +5,7 @@ import logging
 
 import torch
 import torch.nn as nn
+import torchvision.models.video as models
 
 import pandas as pd
 import numpy as np
@@ -54,9 +55,10 @@ else:
 #-------------------------------------------------  Constants -------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-IMAGE_SIZE = (64, 64, 64)
-BATCH_SIZE = 1
+IMAGE_SIZE = (128, 128, 128)
+BATCH_SIZE = 2
 NUM_CLASSES = 2
+NUM_WORKERS = 4
 
 SEED = 42
 VAL_RATIO = 0.2
@@ -74,7 +76,7 @@ SAVE_DIR = "/home/vivianea/projects/BrainInnov/py_files_3D/resnetPy/optuna"
 CLASS_MAP = {'cancer': 0, 'non-cancer': 1}
 INDEX_TO_CLASS = {0: 'non-cancer', 1: 'cancer'}
 
-NUM_AUG_PER_SAMPLE = 1
+NUM_AUG_PER_SAMPLE = 2
 
 LOG_FILE = "training_log.txt"
 
@@ -140,16 +142,16 @@ def get_transforms():
         RandFlip(spatial_axis=0, prob=0.5),
         RandFlip(spatial_axis=1, prob=0.5),
         RandFlip(spatial_axis=2, prob=0.5),
-        # RandRotate(range_x=0.2, range_y=0.2, range_z=0.2, prob=0.5),
-        # RandAffine(
-        #    rotate_range=(0.1, 0.1, 0.1),
-        #    translate_range=(5, 5, 5),
-        #    scale_range=(0.1, 0.1, 0.1),
-        #    prob=0.3
-        #),
-        # RandBiasField(prob=0.3),
-        # RandAdjustContrast(prob=0.3, gamma=(0.7, 1.5)),
-        # RandZoom(min_zoom=0.9, max_zoom=1.1, prob=0.2),
+        RandRotate(range_x=0.2, range_y=0.2, range_z=0.2, prob=0.5),
+        RandAffine(
+           rotate_range=(0.1, 0.1, 0.1),
+           translate_range=(5, 5, 5),
+           scale_range=(0.1, 0.1, 0.1),
+           prob=0.3
+        ),
+        RandBiasField(prob=0.3),
+        RandAdjustContrast(prob=0.3, gamma=(0.7, 1.5)),
+        RandZoom(min_zoom=0.9, max_zoom=1.1, prob=0.2),
         Resize(spatial_size=IMAGE_SIZE, mode="trilinear")
     ])
 
@@ -159,7 +161,7 @@ test_dataset = LIDCDataset3D(csv_path_idx=CSV_TEST, npy_dir=PATH_TEST, transform
 
 print(f"✅ Loaded: {len(train_dataset)} train | {len(val_dataset)} val | {len(test_dataset)} test")
 
-
+'''
 class FrozenAugmentedDataset(Dataset):
     def __init__(self, base_dataset):
         self.data = []
@@ -177,6 +179,7 @@ frozen_dataset_train = FrozenAugmentedDataset(train_dataset)
 frozen_dataset_val = FrozenAugmentedDataset(val_dataset)
 frozen_dataset_test = FrozenAugmentedDataset(test_dataset)
 
+'''
 
 def seed_worker(worker_id):
     worker_seed = torch.initial_seed() % 2**32
@@ -200,7 +203,7 @@ samples_weight = [target_per_class / class_counts[label_] for label_ in labels_t
 num_samples = len(samples_weight) * num_aug_per_sample
 sampler_train = WeightedRandomSampler(samples_weight, num_samples=num_samples, replacement=True)
 
-train_loader = DataLoader(frozen_dataset_train, batch_size=BATCH_SIZE, num_workers=0, sampler=sampler_train, worker_init_fn=seed_worker, generator=g)
+train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, sampler=sampler_train, worker_init_fn=seed_worker, generator=g)
 
 labels_val = [s[1] for s in val_dataset]  # Adjust if your dataset is not structured this way
 class_counts = Counter(labels_train)
@@ -212,7 +215,7 @@ samples_weight = [target_per_class / class_counts[label_] for label_ in labels_v
 num_samples = len(samples_weight) * num_aug_per_sample
 sampler_val = WeightedRandomSampler(samples_weight, num_samples=num_samples, replacement=True)
 
-val_loader = DataLoader(frozen_dataset_val, batch_size=BATCH_SIZE, num_workers=0, sampler=sampler_val, worker_init_fn=seed_worker, generator=g)
+val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, sampler=sampler_val, worker_init_fn=seed_worker, generator=g)
 
 labels_test = [s[1] for s in val_dataset]
 class_counts = Counter(labels_train)
@@ -224,7 +227,7 @@ samples_weight = [target_per_class / class_counts[label_] for label_ in labels_t
 num_samples = len(samples_weight) * num_aug_per_sample
 sampler_test = WeightedRandomSampler(samples_weight, num_samples=num_samples, replacement=True)
 
-test_loader = DataLoader(frozen_dataset_test, batch_size=BATCH_SIZE, num_workers=0, sampler=sampler_test, worker_init_fn=seed_worker, generator=g)
+test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, sampler=sampler_test, worker_init_fn=seed_worker, generator=g)
 
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  Architecture -----------------------------------------------------------------------
@@ -232,80 +235,59 @@ test_loader = DataLoader(frozen_dataset_test, batch_size=BATCH_SIZE, num_workers
 
 from torchvision.models.video import r3d_18
 
-class AttentionBlock(nn.Module):
-    def __init__(self, in_channels, trial: optuna.trial.Trial):
-        super(AttentionBlock, self).__init__()
-        # Tune the reduction ratio for the attention block
-        # A smaller ratio means more channels in the intermediate layer,
-        # potentially more expressive but also more parameters.
-        # Common ratios are powers of 2.
-        reduction_ratio = trial.suggest_categorical('attention_reduction_ratio', [2, 4, 8, 16])
-        
-        self.conv1 = nn.Conv3d(in_channels, in_channels // reduction_ratio, kernel_size=1)
-        self.relu = nn.ReLU(inplace=True)
-        self.conv2 = nn.Conv3d(in_channels // reduction_ratio, in_channels, kernel_size=1)
-        self.sigmoid = nn.Sigmoid()
-
-    def forward(self, x):
-        attn = self.conv1(x)
-        attn = self.relu(attn)
-        attn = self.conv2(attn)
-        attn = self.sigmoid(attn)
-        return x * attn
-
 class Resnet3DClassifierPy(nn.Module):
-    def __init__(self, trial: optuna.trial.Trial, num_classes=NUM_CLASSES):
+    def __init__(self, num_classes, dropout_1, dropout_2):
         super(Resnet3DClassifierPy, self).__init__()
         
-        # You can consider tuning if you want pre-trained weights or not
-        # For medical images, usually training from scratch or pre-training on similar data is better
-        # pretrained_weights = trial.suggest_categorical('resnet_pretrained_weights', [True, False])
-        # If using pretrained, you might use torchvision.models.video.R3D_18_Weights.KINETICS400_V1
-        self.backbone = r3d_18(weights=None) # Start with None, as you're customizing stem
+        # Load pre-trained R3D_18 model
+        self.model = models.r3d_18(pretrained=True)
         
-        # The input channel modification is usually fixed for your data (1 channel)
-        # You could, theoretically, explore different kernel sizes or strides for the stem,
-        # but often it's best to keep this fixed unless you have a strong reason.
-        self.backbone.stem[0] = nn.Conv3d(1, 64, kernel_size=(3, 7, 7), stride=(1, 2, 2), padding=(1, 3, 3))
+        # Modify first convolutional layer for single-channel input
+        original_first_conv = self.model.stem[0]
+        self.model.stem[0] = nn.Conv3d(
+            1, 
+            original_first_conv.out_channels,
+            kernel_size=original_first_conv.kernel_size,
+            stride=original_first_conv.stride,
+            padding=original_first_conv.padding,
+            bias=original_first_conv.bias
+        )
         
-        # Instantiate AttentionBlock, passing the trial object
-        # The in_channels for AttentionBlock (512) is determined by r3d_18's last layer output
-        self.attn = AttentionBlock(in_channels=512, trial=trial)
+        # Initialize new first layer weights (mean of original RGB weights)
+        with torch.no_grad():
+            mean_weights = torch.mean(original_first_conv.weight, dim=1, keepdim=True)
+            self.model.stem[0].weight.copy_(mean_weights)
         
-        # Replace the final classification head
-        self.backbone.fc = nn.Identity() # Remove the original FC layer
+        # Replace final fully connected layer
+        in_features = self.model.fc.in_features
+        self.model.fc = nn.Sequential(
+            nn.Dropout(dropout_1),
+            nn.Linear(in_features, 512),
+            nn.ReLU(),
+            nn.Dropout(dropout_2),
+            nn.Linear(512, num_classes)
+        )
         
-        # Tune the dropout rate *before* the final linear layer
-        # You had dropout fixed at 0.3 in the forward pass, let's make it tunable
-        dropout_rate_fc = trial.suggest_float('fc_dropout_rate', 0.1, 0.5, step=0.1)
-        self.dropout_fc = nn.Dropout(dropout_rate_fc) # Define as a module
-
-        # Tune the dropout rate after layer4 (before attention)
-        # You had dropout fixed at 0.3 here as well, let's make it tunable
-        dropout_rate_layer4 = trial.suggest_float('layer4_dropout_rate', 0.1, 0.5, step=0.1)
-        self.dropout_layer4 = nn.Dropout(dropout_rate_layer4) # Define as a module
-        
-        self.fc = nn.Linear(512, num_classes)
-
+        # Freeze early layers
+        for name, param in self.model.named_parameters():
+            if 'stem' in name or 'layer1' in name or 'layer2' in name:
+                param.requires_grad = False
+                
     def forward(self, x):
-        x = self.backbone.stem(x)
-        x = self.backbone.layer1(x)
-        x = self.backbone.layer2(x)
-        x = self.backbone.layer3(x)
-        
-        # Apply the tunable dropout here
-        x = self.dropout_layer4(x) 
-        
-        x = self.backbone.layer4(x)
-        x = self.attn(x)
-        x = self.backbone.avgpool(x)
-        x = torch.flatten(x, 1)
-        
-        # Apply the tunable dropout here
-        x = self.dropout_fc(x) 
-        
-        x = self.fc(x)
+        return self.model(x)
+    
+    def forward_features(self, x):
+        # Forward pass up to before the final classifier
+        x = self.model.stem(x)
+        x = self.model.layer1(x)
+        x = self.model.layer2(x)
+        x = self.model.layer3(x)
+        x = self.model.layer4(x)
+        x = self.model.avgpool(x)  # shape: [B, 512, 1, 1, 1]
+        x = torch.flatten(x, 1)    # shape: [B, 512]
         return x
+
+
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  OPTUNA -----------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
@@ -318,20 +300,23 @@ def objective(trial):
 
     # --- Hyperparameters to tune for training ---
     lr = trial.suggest_float('lr', 1e-5, 1e-2, log=True)
-    optimizer_name = trial.suggest_categorical('optimizer', ['Adam', 'RMSprop', 'SGD'])
+    optimizer_name = trial.suggest_categorical('optimizer', ['Adam', 'SGD'])
     # Batch sizes for 3D are often small due to VRAM limitations
-    batch_size = trial.suggest_categorical('batch_size', [1, 2, 4, 8]) 
+    batch_size = trial.suggest_categorical('batch_size', [1, 2, 4, 8])
+    num_workers = trial.suggest_categorical('num_workers', [0, 1, 2, 4, 8]) 
     epochs = trial.suggest_int('epochs', 5, 20) # Keep low for initial testing
     weight_decay = trial.suggest_float('weight_decay', 1e-6, 1e-3, log=True)
     gradient_clipping_norm = trial.suggest_float('gradient_clipping_norm', 0.1, 5.0, step=0.1)
-
+    dropout_1 = trial.suggest_float('dropout_1', 0.1, 0.7)
+    dropout_2 = trial.suggest_float('dropout_2', 0.1, 0.7)
     # Get data loaders
     # train_loader, val_loader = get_data_loaders(batch_size, IMAGE_SIZE)
 
     # Initialize model with suggested hyperparameters
     model = Resnet3DClassifierPy(
-        trial=trial,
-        num_classes=NUM_CLASSES # Fixed for your LIDC classification task
+        num_classes=NUM_CLASSES,
+        dropout_1=dropout_1,
+         dropout_2=dropout_2 # Fixed for your LIDC classification task
     ).to(device)
 
     # Initialize optimizer
