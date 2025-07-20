@@ -1,0 +1,28 @@
+
+
+==== Training started at 2025-07-15 23:49:25.254675 ====
+
+Using Gradient Accumulation with 4 steps.
+DataLoader batch size: 4
+Effective batch size: 16
+
+Epoch 1/100
+Train Loss: 0.4338 | Train Acc: 78.67%
+Val Loss: 1.7705 | Val Acc: 42.55%
+Precision: 0.4253 | Recall: 0.4314 | F1 Score: 0.4166
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 1: 5311
+Label distribution in training epoch: Counter({0: 2816, 1: 2764})
+
+Validation loss improved. Saving best model to /home/etudiant/Projets/Viviane/LIDC-ML/models/best_model_resnet_pytorch3D_architecture_v0.pth
+
+Epoch 2/100
+Train Loss: 0.1947 | Train Acc: 92.85%
+Val Loss: 3.0070 | Val Acc: 43.28%
+Precision: 0.4160 | Recall: 0.4367 | F1 Score: 0.3981
+Current AMP scale: 32768.0
+Unique augmented volumes seen in epoch 2: 5287
+Label distribution in training epoch: Counter({1: 2806, 0: 2774})
+
+Validation loss did not improve. Patience: 1/50
+
