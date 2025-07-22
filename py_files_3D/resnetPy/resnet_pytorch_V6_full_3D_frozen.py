@@ -58,13 +58,13 @@ else:
 #---------------------------------------------------------------------------------------------------------------------------------------
 
 IMAGE_SIZE = (256, 256, 256)
-BATCH_SIZE = 2
+BATCH_SIZE = 8
 NUM_WORKERS = 0
 NUM_CHANNELS = 1
 DEPTH = 128
 NUM_CLASSES = 2
-PATIENCE_COUNTER = 80
-EPOCHS = 100
+PATIENCE_COUNTER = 120
+EPOCHS = 150
 SEED = 42
 VAL_RATIO = 0.2
 TEST_RATIO = 0.2
@@ -94,6 +94,27 @@ NUM_AUG_PER_SAMPLE_TEST_VAL = 1
 
 LOG_FILE = "training_log.txt"
 
+best_params_from_optuna = {
+    'lr': 0.0001,
+    'optimizer': 'Adam',
+    'weight_decay': 1e-4,
+    'gradient_clipping_norm': 2.6,
+    'dropout_1': 0.5,
+    'dropout_2': 0.3
+ }
+
+'''
+Best trial:Trial()
+    lr: 0.0003032918428858118
+    optimizer: SGD
+    batch_size: 4
+    num_workers: 0
+    epochs: 5
+    weight_decay: 5.39885818036582e-05
+    gradient_clipping_norm: 0.2
+    dropout_1: 0.4632788000956176
+    dropout_2: 0.5378839862375957
+'''
 #---------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------  SEED -------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------
@@ -261,7 +282,7 @@ def size_by_classes(train_dataset):
 from torchvision.models.video import r3d_18
 
 class Resnet3DClassifierPy(nn.Module):
-    def __init__(self, num_classes=2):
+    def __init__(self, num_classes, dropout_1, dropout_2):
         super(Resnet3DClassifierPy, self).__init__()
         
         # Load pre-trained R3D_18 model
@@ -286,10 +307,10 @@ class Resnet3DClassifierPy(nn.Module):
         # Replace final fully connected layer
         in_features = self.model.fc.in_features
         self.model.fc = nn.Sequential(
-            nn.Dropout(0.5),
+            nn.Dropout(dropout_1),
             nn.Linear(in_features, 512),
             nn.ReLU(),
-            nn.Dropout(0.3),
+            nn.Dropout(dropout_2),
             nn.Linear(512, num_classes)
         )
         
@@ -317,15 +338,14 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 model = Resnet3DClassifierPy(
     num_classes=NUM_CLASSES,
-    # best_attention_reduction_ratio=best_params_from_optuna['attention_reduction_ratio'],
-    # best_fc_dropout_rate=best_params_from_optuna['fc_dropout_rate'],
-    # best_layer4_dropout_rate=best_params_from_optuna['layer4_dropout_rate']
+    dropout_1=best_params_from_optuna['dropout_1'],
+    dropout_2=best_params_from_optuna['dropout_2'],
 ).to(device)
 
 criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), 
-                            lr = 0.0001, 
-                            weight_decay=1e-4)
+                            lr = best_params_from_optuna['lr'], 
+                            weight_decay=best_params_from_optuna['weight_decay'])
 
 # summary(model, input_size=(BATCH_SIZE, NUM_CHANNELS, DEPTH, IMAGE_SIZE_SUMMARY, IMAGE_SIZE_SUMMARY))
 
@@ -853,12 +873,13 @@ for i, name in enumerate(classes):
 try:
     # 2. Instantiate your model class
     # Pass the SAME in_channels and out_channels that you used during training.
+    
     model = Resnet3DClassifierPy(
-                num_classes=NUM_CLASSES,
-                # best_attention_reduction_ratio=best_params_from_optuna['attention_reduction_ratio'],
-                # best_fc_dropout_rate=best_params_from_optuna['fc_dropout_rate'],
-                # best_layer4_dropout_rate=best_params_from_optuna['layer4_dropout_rate']
-                )
+        num_classes=NUM_CLASSES,
+        dropout_1=best_params_from_optuna['dropout_1'],
+        dropout_2=best_params_from_optuna['dropout_2'],
+    )
+
     print(f"Instantiated Resnet3D-Pytorch")
 
     # 3. Load the state_dict
